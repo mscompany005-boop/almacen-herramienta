@@ -15,68 +15,91 @@ body{
   display:flex;flex-direction:column;overscroll-behavior:none;
 }
 :root{
-  --acc:#2f9e6e; --acc2:#1f7a54; --dang:#d9433f; --warn:#e0a03a;
-  --card:#181d24; --line:#272e38; --mut:#8b97a6;
+  --verde:#2f9e6e; --verde2:#24805a;
+  --ambar:#c8821f; --ambar2:#a66b16;
+  --rojo:#d9433f; --card:#181d24; --line:#272e38; --mut:#8b97a6;
 }
 header{
-  padding:10px 14px;background:#141920;border-bottom:1px solid var(--line);
+  padding:12px 14px;background:#141920;border-bottom:1px solid var(--line);
   display:flex;align-items:center;gap:10px;flex:0 0 auto;
 }
-header h1{font-size:15px;margin:0;font-weight:600;letter-spacing:.3px;flex:1}
-header .sub{font-size:11px;color:var(--mut);font-weight:400}
+header h1{font-size:15px;margin:0;font-weight:600;flex:1;line-height:1.25}
+header .sub{font-size:11.5px;color:var(--mut);font-weight:400;margin-top:1px}
 .iconbtn{
   background:#222935;border:1px solid var(--line);color:#cfd8e3;
-  border-radius:9px;padding:8px 11px;font-size:13px;font-weight:600;
+  border-radius:9px;padding:9px 12px;font-size:13px;font-weight:600;flex:0 0 auto;
 }
-main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;padding-bottom:28px}
+main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;padding-bottom:30px}
 .hide{display:none!important}
+button{font-family:inherit;cursor:pointer}
 
-button{font-family:inherit}
-.big{
-  width:100%;padding:20px;font-size:19px;font-weight:700;border:0;border-radius:14px;
-  background:var(--acc);color:#fff;letter-spacing:.3px;
+/* botones de accion */
+.accion{
+  width:100%;border:0;border-radius:16px;padding:26px 18px;margin-bottom:12px;
+  text-align:left;color:#fff;display:block;
 }
-.big:active{background:var(--acc2)}
-.big.grey{background:#2b3340;color:#dbe3ec}
-.big.red{background:var(--dang)}
+.accion .t{font-size:23px;font-weight:800;letter-spacing:.3px;display:block}
+.accion .d{font-size:13.5px;opacity:.9;margin-top:4px;display:block;font-weight:500}
+.accion.prestar{background:var(--verde)}
+.accion.prestar:active{background:var(--verde2)}
+.accion.devolver{background:var(--ambar)}
+.accion.devolver:active{background:var(--ambar2)}
+
+.big{
+  width:100%;padding:19px;font-size:18px;font-weight:700;border:0;border-radius:14px;
+  background:var(--verde);color:#fff;
+}
+.big.gris{background:#2b3340;color:#dbe3ec}
+.big.ambar{background:var(--ambar)}
 .sec{
   width:100%;padding:13px;font-size:15px;font-weight:600;border:1px solid var(--line);
   border-radius:11px;background:#1d242d;color:#dbe3ec;margin-top:9px;
 }
-.row{display:flex;gap:9px}
-.row>*{flex:1}
 
-.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px;margin-bottom:11px}
-.card h2{margin:0 0 4px;font-size:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px;margin-bottom:12px}
+.card h2{margin:0 0 5px;font-size:16px}
 .card p{margin:3px 0;font-size:13px;color:var(--mut);line-height:1.45}
-.pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.3px}
+
+/* cabecera de paso */
+.pasobar{
+  display:flex;align-items:center;gap:10px;margin-bottom:12px;
+}
+.pasonum{
+  width:34px;height:34px;border-radius:50%;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:16px;color:#fff;background:var(--verde);
+}
+.pasobar.dev .pasonum{background:var(--ambar)}
+.pasotxt{flex:1}
+.pasotxt .k{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;font-weight:700}
+.pasotxt .v{font-size:16px;font-weight:700;margin-top:1px}
+
+.pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
 .pill.ok{background:#17382a;color:#5fd39b}
 .pill.out{background:#3a2420;color:#f08a86}
-.pill.late{background:var(--dang);color:#fff}
+.pill.late{background:var(--rojo);color:#fff}
 
-label{display:block;font-size:12px;color:var(--mut);margin:12px 0 5px;font-weight:600;letter-spacing:.3px}
+label{display:block;font-size:12px;color:var(--mut);margin:12px 0 5px;font-weight:600}
 input,select{
   width:100%;padding:13px;font-size:16px;border-radius:10px;
   border:1px solid var(--line);background:#11161c;color:#e8edf2;
 }
-input:focus,select:focus{outline:2px solid var(--acc);border-color:transparent}
+input:focus,select:focus{outline:2px solid var(--verde);border-color:transparent}
 
 #scanwrap{position:relative;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:1/1;margin-bottom:12px}
 #video{width:100%;height:100%;object-fit:cover;display:block}
-#reticle{
-  position:absolute;inset:16%;border:3px solid rgba(255,255,255,.85);border-radius:16px;
-  box-shadow:0 0 0 2000px rgba(0,0,0,.35);
-}
-#scanmsg{position:absolute;left:0;right:0;bottom:0;padding:9px;background:rgba(0,0,0,.72);
-  font-size:13px;text-align:center;font-weight:600}
+#reticle{position:absolute;inset:16%;border:3px solid rgba(255,255,255,.85);border-radius:16px;
+  box-shadow:0 0 0 2000px rgba(0,0,0,.35)}
+#scanmsg{position:absolute;left:0;right:0;bottom:0;padding:10px;background:rgba(0,0,0,.75);
+  font-size:13.5px;text-align:center;font-weight:600}
 
 #toast{
-  position:fixed;left:12px;right:12px;bottom:14px;padding:15px;border-radius:13px;
+  position:fixed;left:12px;right:12px;bottom:14px;padding:16px;border-radius:13px;
   font-size:15px;font-weight:700;text-align:center;z-index:50;line-height:1.35;
   box-shadow:0 8px 28px rgba(0,0,0,.5);
 }
-#toast.ok{background:var(--acc);color:#fff}
-#toast.err{background:var(--dang);color:#fff}
+#toast.ok{background:var(--verde);color:#fff}
+#toast.err{background:var(--rojo);color:#fff}
 #toast.info{background:#2b3340;color:#e8edf2}
 
 .item{border-bottom:1px solid var(--line);padding:11px 0}
@@ -84,92 +107,101 @@ input:focus,select:focus{outline:2px solid var(--acc);border-color:transparent}
 .item .t{font-size:15px;font-weight:600}
 .item .s{font-size:12px;color:var(--mut);margin-top:2px}
 .item.late .t{color:#ff8e8a}
+.item.tap{cursor:pointer}
 
 .tabs{display:flex;gap:7px;margin-bottom:13px;overflow-x:auto;padding-bottom:3px}
-.tabs button{
-  flex:0 0 auto;padding:9px 14px;border-radius:20px;border:1px solid var(--line);
-  background:#1b2129;color:#b9c4d1;font-size:13px;font-weight:600;
-}
-.tabs button.on{background:var(--acc);border-color:var(--acc);color:#fff}
-.empty{text-align:center;color:var(--mut);font-size:13px;padding:26px 10px;line-height:1.5}
+.tabs button{flex:0 0 auto;padding:9px 14px;border-radius:20px;border:1px solid var(--line);
+  background:#1b2129;color:#b9c4d1;font-size:13px;font-weight:600}
+.tabs button.on{background:var(--verde);border-color:var(--verde);color:#fff}
+.empty{text-align:center;color:var(--mut);font-size:13px;padding:26px 10px;line-height:1.55}
 #qrbox{background:#fff;padding:16px;border-radius:13px;text-align:center}
-#qrbox img,#qrbox canvas{width:100%;max-width:250px;height:auto;image-rendering:pixelated}
-.mono{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:1px}
-.warnbar{background:#3a2d16;border:1px solid #6b5423;color:#e8c783;padding:11px;border-radius:11px;font-size:12.5px;line-height:1.5;margin-bottom:12px}
-hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+#qrbox img{width:100%;max-width:250px;height:auto;image-rendering:pixelated}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.5px}
+.warnbar{background:#3a2d16;border:1px solid #6b5423;color:#e8c783;padding:11px;
+  border-radius:11px;font-size:12.5px;line-height:1.5;margin-bottom:12px}
+.okbig{text-align:center;padding:14px 6px}
+.okbig .tick{font-size:52px;line-height:1}
+.okbig h2{margin:10px 0 4px;font-size:20px}
+.okbig p{color:var(--mut);font-size:14px;margin:2px 0}
 </style>
 </head>
 <body>
 
 <header>
   <div style="flex:1">
-    <h1>Almacén de Herramienta</h1>
-    <div class="sub" id="hdrsub">Listo para escanear</div>
+    <h1 id="hdrTit">Almacén de Herramienta</h1>
+    <div class="sub" id="hdrSub">¿Qué vas a hacer?</div>
   </div>
   <button class="iconbtn soloKiosco" id="btnPanel">Panel</button>
 </header>
 
 <main>
 
-  <!-- ===== INICIO ===== -->
+  <!-- ===================== INICIO ===================== -->
   <section id="vInicio">
-    <div class="warnbar hide" id="avisoCam">Esta vista no puede usar la cámara. Sirve para probar la lógica tecleando folios. Para escanear de verdad, abre la app desde la liga en HTTPS.</div>
-    <div class="warnbar hide" id="avisoStore">Este navegador no está guardando los datos. Todo lo que registres se perderá al recargar. Abre la app desde su liga normal, no desde un archivo ni en modo incógnito.</div>
-    <div class="card modoReg hide"><h2>Registro de personal</h2><p>Llena tus datos una sola vez. Se te genera tu credencial con código QR: guárdala en tu celular o imprímela y muéstrala en el almacén cada vez que saques herramienta.</p></div>
-    <div class="card" id="activeCard" style="display:none"></div>
-    <button class="big soloKiosco" id="btnScan">PASO 1 · ESCANEAR PERSONA</button>
-    <button class="big soloKiosco hide" id="btnScanHerr" style="margin-top:9px">PASO 2 · ESCANEAR HERRAMIENTAS</button>
-    <button class="sec soloKiosco hide" id="btnTerminarTurno">Terminar turno</button>
-    <button class="sec soloKiosco" id="btnManual">Teclear folio</button>
-    <button class="sec" id="btnAlta">Registrarme (nueva persona)</button>
-    <div id="resumen" class="soloKiosco" style="margin-top:18px"></div>
-  </section>
+    <div class="warnbar hide" id="avisoCam">Esta vista no puede usar la cámara. Para escanear de verdad, abre la app desde su liga en HTTPS.</div>
+    <div class="warnbar hide" id="avisoStore">Este navegador no está guardando los datos. Lo que registres se perderá al recargar.</div>
 
-  <!-- ===== ESCANEO ===== -->
-  <section id="vScan" class="hide">
-    <div id="scanwrap">
-      <video id="video" playsinline muted></video>
-      <div id="reticle"></div>
-      <div id="scanmsg">Acerca el código</div>
+    <div class="card modoReg hide">
+      <h2>Registro de personal</h2>
+      <p>Llena tus datos una sola vez. Se te genera tu credencial con código QR: guárdala en tu celular o imprímela, y muéstrala en el almacén cuando saques herramienta.</p>
     </div>
-    <div class="card" id="scanInfo"></div>
-    <div id="scanLista"></div>
-    <button class="big grey" id="btnCerrarScan">Terminar</button>
+
+    <button class="accion prestar soloKiosco" id="btnPrestar">
+      <span class="t">PRESTAR</span>
+      <span class="d">Alguien se lleva herramienta</span>
+    </button>
+    <button class="accion devolver soloKiosco" id="btnDevolver">
+      <span class="t">DEVOLVER</span>
+      <span class="d">Alguien regresa herramienta</span>
+    </button>
+
+    <button class="sec" id="btnAlta">Registrar persona nueva</button>
+    <div id="resumen" class="soloKiosco" style="margin-top:16px"></div>
   </section>
 
-  <!-- ===== ALTA PERSONA ===== -->
-  <section id="vPersona" class="hide">
-    <div class="card">
-      <h2>Registrar persona</h2>
-      <p>Se le genera su QR al terminar. Lo puede guardar en el celular o imprimirlo.</p>
+  <!-- ===================== PASO 1: PERSONA ===================== -->
+  <section id="vPaso1" class="hide">
+    <div class="pasobar" id="barra1">
+      <div class="pasonum">1</div>
+      <div class="pasotxt"><div class="k" id="k1">Prestar</div><div class="v">¿Quién es?</div></div>
     </div>
-    <label>Nombre completo</label>
-    <input id="pNombre" autocomplete="off" placeholder="Ej. Martín Flores">
-    <label>Usuario de Teams o correo</label>
-    <input id="pTeams" autocomplete="off" inputmode="email" placeholder="nombre@empresa.com">
-    <div style="height:16px"></div>
-    <button class="big" id="btnGuardarPersona">Guardar y generar QR</button>
-    <button class="sec" id="btnCancelPersona">Cancelar</button>
+    <div id="scanwrap1"></div>
+    <div class="card"><p id="ayuda1">Acerca la credencial de la persona a la cámara.</p></div>
+    <input id="buscarPersona" autocomplete="off" placeholder="o escribe su nombre para buscarlo">
+    <div id="listaPersonas"></div>
+    <button class="sec" id="btnAltaDesdePaso1">Registrar persona nueva</button>
+    <button class="sec" id="btnCancelar1">Cancelar</button>
   </section>
 
-  <!-- ===== QR DE PERSONA ===== -->
-  <section id="vQR" class="hide">
-    <div class="card"><h2 id="qrNombre"></h2><p id="qrDatos"></p></div>
-    <div id="qrbox"></div>
-    <div style="height:14px"></div>
-    <button class="big" id="btnDescargarQR">Descargar imagen</button>
-    <button class="sec" id="btnImprimirQR">Imprimir credencial</button>
-    <button class="sec" id="btnQRListo">Listo</button>
+  <!-- ===================== PASO 2: HERRAMIENTAS ===================== -->
+  <section id="vPaso2" class="hide">
+    <div class="pasobar" id="barra2">
+      <div class="pasonum">2</div>
+      <div class="pasotxt"><div class="k" id="k2">Prestar</div><div class="v" id="v2">¿Qué se lleva?</div></div>
+    </div>
+    <div id="scanwrap2"></div>
+    <div class="card"><p id="ayuda2">Escanea la etiqueta de cada herramienta. Puedes escanear varias seguidas.</p></div>
+    <div id="listaTurno"></div>
+    <button class="big" id="btnListo">LISTO</button>
+    <button class="sec" id="btnFolioManual">Teclear folio</button>
+    <button class="sec" id="btnCancelar2">Cancelar</button>
   </section>
 
-  <!-- ===== ALTA HERRAMIENTA ===== -->
+  <!-- ===================== RESUMEN ===================== -->
+  <section id="vFin" class="hide">
+    <div class="card okbig" id="finCard"></div>
+    <button class="big" id="btnFinOk">Volver al inicio</button>
+  </section>
+
+  <!-- ===================== ALTA DE HERRAMIENTA ===================== -->
   <section id="vHerr" class="hide">
     <div class="card">
-      <h2>Nueva herramienta</h2>
-      <p>Folio <span class="mono" id="hFolio"></span></p>
+      <h2>Herramienta nueva</h2>
+      <p>Esta etiqueta todavía no tiene nombre. Folio <span class="mono" id="hFolio"></span></p>
     </div>
     <label>¿Qué herramienta es?</label>
-    <input id="hNombre" autocomplete="off" placeholder="Ej. Dado de matraca 1/2&quot;">
+    <input id="hNombre" autocomplete="off" placeholder='Ej. Dado de matraca 1/2"'>
     <label>Tipo de control</label>
     <select id="hTipo">
       <option value="individual">Individual — esta pieza en particular</option>
@@ -179,52 +211,64 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
       <label>¿Cuántas piezas hay en total?</label>
       <input id="hCant" type="number" inputmode="numeric" min="1" value="10">
     </div>
-    <div style="height:16px"></div>
-    <button class="big" id="btnGuardarHerr">Guardar</button>
+    <div style="height:14px"></div>
+    <button class="big" id="btnGuardarHerr">Guardar y continuar</button>
     <button class="sec" id="btnCancelHerr">Cancelar</button>
   </section>
 
-  <!-- ===== QUIEN SE LA LLEVA ===== -->
-  <section id="vQuien" class="hide">
-    <div class="card" id="quienHerr"></div>
-    <h3 style="font-size:15px;margin:4px 0 10px">¿Quién se la lleva?</h3>
-    <button class="big" id="btnQuienScan">ESCANEAR SU CREDENCIAL</button>
-    <input id="quienBuscar" autocomplete="off" placeholder="o busca por nombre" style="margin-top:12px">
-    <div id="quienLista"></div>
-    <button class="sec" id="btnQuienNueva">Registrar persona nueva</button>
-    <button class="sec" id="btnQuienCancel">Cancelar</button>
-  </section>
-
-  <!-- ===== CANTIDAD (lote) ===== -->
+  <!-- ===================== CANTIDAD (lotes) ===================== -->
   <section id="vCant" class="hide">
     <div class="card"><h2 id="cTitulo"></h2><p id="cSub"></p></div>
     <label id="cLabel">¿Cuántas?</label>
     <input id="cValor" type="number" inputmode="numeric" min="1" value="1">
-    <div style="height:16px"></div>
+    <div style="height:14px"></div>
     <button class="big" id="btnCantOk">Confirmar</button>
     <button class="sec" id="btnCantCancel">Cancelar</button>
   </section>
 
-  <!-- ===== MANUAL ===== -->
+  <!-- ===================== FOLIO MANUAL ===================== -->
   <section id="vManual" class="hide">
-    <div class="card"><h2>Teclear folio</h2><p>Por si el código está maltratado o la cámara no lo lee.</p></div>
+    <div class="card"><h2>Teclear folio</h2><p>Úsalo si la etiqueta está maltratada o la cámara no la lee.</p></div>
     <label>Folio</label>
-    <input id="mFolio" autocomplete="off" class="mono" placeholder="HER-0001 o PER-0001" style="text-transform:uppercase">
-    <div style="height:16px"></div>
+    <input id="mFolio" autocomplete="off" class="mono" placeholder="HER-0001" style="text-transform:uppercase">
+    <div style="height:14px"></div>
     <button class="big" id="btnManualOk">Continuar</button>
     <button class="sec" id="btnManualCancel">Cancelar</button>
   </section>
 
-  <!-- ===== PIN ===== -->
+  <!-- ===================== ALTA DE PERSONA ===================== -->
+  <section id="vPersona" class="hide">
+    <div class="card"><h2>Registrar persona</h2><p>Al guardar se genera su credencial con QR.</p></div>
+    <label>Nombre completo</label>
+    <input id="pNombre" autocomplete="off" placeholder="Ej. Martín Flores">
+    <label>Usuario de Teams o correo</label>
+    <input id="pTeams" autocomplete="off" inputmode="email" placeholder="nombre@empresa.com">
+    <div style="height:14px"></div>
+    <button class="big" id="btnGuardarPersona">Guardar y generar QR</button>
+    <button class="sec" id="btnCancelPersona">Cancelar</button>
+  </section>
+
+  <!-- ===================== QR DE PERSONA ===================== -->
+  <section id="vQR" class="hide">
+    <div class="card"><h2 id="qrNombre"></h2><p id="qrDatos"></p></div>
+    <div id="qrbox"></div>
+    <div style="height:12px"></div>
+    <button class="big" id="btnQRListo">Continuar</button>
+    <button class="sec" id="btnDescargarQR">Descargar imagen</button>
+    <button class="sec" id="btnImprimirQR">Imprimir credencial</button>
+  </section>
+
+  <!-- ===================== PIN ===================== -->
   <section id="vPin" class="hide">
-    <div class="card"><h2 id="pinTitulo">PIN de administrador</h2><p id="pinSub"></p></div>
-    <input id="pinVal" type="password" inputmode="numeric" maxlength="8" class="mono" style="text-align:center;font-size:26px;letter-spacing:8px">
-    <div style="height:16px"></div>
+    <div class="card"><h2>PIN de administrador</h2><p>Para ver reportes y ajustes.</p></div>
+    <input id="pinVal" type="password" inputmode="numeric" maxlength="8" class="mono"
+           style="text-align:center;font-size:26px;letter-spacing:8px">
+    <div style="height:14px"></div>
     <button class="big" id="btnPinOk">Entrar</button>
     <button class="sec" id="btnPinCancel">Cancelar</button>
   </section>
 
-  <!-- ===== PANEL ===== -->
+  <!-- ===================== PANEL ===================== -->
   <section id="vPanel" class="hide">
     <div class="tabs">
       <button data-tab="fuera" class="on">Fuera</button>
@@ -235,7 +279,7 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
     </div>
     <div id="panelBody"></div>
     <div style="height:12px"></div>
-    <button class="sec" id="btnSalirPanel">Volver al kiosco</button>
+    <button class="sec" id="btnSalirPanel">Volver al inicio</button>
   </section>
 
 </main>
@@ -247,32 +291,32 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
 <script>
 "use strict";
 
-/* ============ DATOS ============ */
+/* ======================= DATOS ======================= */
 const KEY = "almacen_herramienta_v1";
 const DEF = {
-  personas: [],      // {id, nombre, area, teams, creado}
+  personas: [],      // {id, nombre, teams, creado}
   herramientas: [],  // {id, nombre, tipo:'individual'|'lote', total, creado}
-  prestamos: [],     // {id, perId, herrId, cant, salida, regreso|null, forzado}
-  config: { pin: "1234", horasAlerta: 12, seqPer: 0 }
+  prestamos: [],     // {id, perId, herrId, cant, salida, regreso|null}
+  config: { pin: "1234", horasAlerta: 12 }
 };
 const clon = o => JSON.parse(JSON.stringify(o));
-let DB = cargar();
+
+let storageOK = true;
+try{
+  localStorage.setItem("__p__","1");
+  storageOK = localStorage.getItem("__p__") === "1";
+  localStorage.removeItem("__p__");
+}catch(e){ storageOK = false; }
 
 function cargar(){
   try{
     const r = localStorage.getItem(KEY);
     if(!r) return clon(DEF);
     const d = JSON.parse(r);
-    return Object.assign(clon(DEF), d,
-      { config: Object.assign(clon(DEF.config), d.config||{}) });
+    return Object.assign(clon(DEF), d, { config: Object.assign(clon(DEF.config), d.config||{}) });
   }catch(e){ return clon(DEF); }
 }
-let storageOK = true;
-try{
-  localStorage.setItem("__prueba__","1");
-  storageOK = localStorage.getItem("__prueba__")==="1";
-  localStorage.removeItem("__prueba__");
-}catch(e){ storageOK = false; }
+let DB = cargar();
 
 function guardar(){
   try{
@@ -280,374 +324,371 @@ function guardar(){
     if(localStorage.getItem(KEY) === null) throw new Error("no persiste");
   }catch(e){
     storageOK = false;
-    const av = $("#avisoStore"); if(av) av.classList.remove("hide");
-    toast("No se pudo guardar en este navegador.","err",5000);
+    const a = document.querySelector("#avisoStore"); if(a) a.classList.remove("hide");
+    toast("No se pudo guardar en este navegador.", "err", 5000);
   }
 }
 
-const perPorId  = id => DB.personas.find(p=>p.id===id);
-const herrPorId = id => DB.herramientas.find(h=>h.id===id);
-const abiertos  = () => DB.prestamos.filter(p=>!p.regreso);
-const abiertosDe= id => abiertos().filter(p=>p.perId===id);
-const fuera     = hid => abiertos().filter(p=>p.herrId===hid)
-                          .reduce((s,p)=>s+(p.cant||1),0);
-const disp      = h => (h.tipo==='lote' ? h.total - fuera(h.id) : (fuera(h.id)?0:1));
-const esTarde   = p => (Date.now()-p.salida) > DB.config.horasAlerta*3600e3;
+const perPorId  = id => DB.personas.find(p => p.id === id);
+const herrPorId = id => DB.herramientas.find(h => h.id === id);
+const abiertos  = () => DB.prestamos.filter(p => !p.regreso);
+const abiertosDe = id => abiertos().filter(p => p.perId === id);
+const fuera = hid => abiertos().filter(p => p.herrId === hid).reduce((s,p) => s + (p.cant||1), 0);
+const disp  = h => h.tipo === "lote" ? h.total - fuera(h.id) : (fuera(h.id) ? 0 : 1);
+const esTarde = p => (Date.now() - p.salida) > DB.config.horasAlerta * 3600e3;
 
 function nuevoIdPersona(){
   let id;
   do { id = "PER-" + Math.random().toString(36).slice(2,8).toUpperCase(); } while(perPorId(id));
   return id;
 }
-// El QR de una persona lleva sus datos dentro, para que cualquier kiosco
-// la pueda dar de alta sola al escanearla por primera vez.
+// La credencial lleva los datos dentro para que cualquier kiosco pueda dar de alta
+// a la persona al escanearla. Los acentos se escapan porque la librería de QR no
+// maneja UTF-8 y el código saldría ilegible.
 const limpio = t => String(t||"").replace(/\|/g,"/").replace(/\n/g," ").trim();
-// Los acentos se escapan: la librería de QR no maneja UTF-8 y el código saldría ilegible.
-const aQR = t => encodeURIComponent(limpio(t));
+const aQR  = t => encodeURIComponent(limpio(t));
 const deQR = t => { try{ return decodeURIComponent(String(t||"")); }catch(e){ return String(t||""); } };
 const codigoPersona = p => ["PER1", p.id, aQR(p.nombre), "", aQR(p.teams)].join("|");
 
-/* ============ UI BÁSICA ============ */
+/* ======================= UI ======================= */
 const $ = s => document.querySelector(s);
-const VIEWS = ["vInicio","vScan","vPersona","vQR","vHerr","vQuien","vCant","vManual","vPin","vPanel"];
+const VIEWS = ["vInicio","vPaso1","vPaso2","vFin","vHerr","vCant","vManual","vPersona","vQR","vPin","vPanel"];
 function ver(id){
-  VIEWS.forEach(v => $("#"+v).classList.toggle("hide", v!==id));
-  if(id!=="vScan") pararCamara();
-  window.scrollTo(0,0); $("main").scrollTop = 0;
+  VIEWS.forEach(v => $("#"+v).classList.toggle("hide", v !== id));
+  if(id !== "vPaso1" && id !== "vPaso2") pararCamara();
+  $("main").scrollTop = 0;
+}
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g,
+  c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = ts => new Date(ts).toLocaleString("es-MX",
+  {day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+function transcurrido(ts){
+  const m = Math.floor((Date.now()-ts)/60000);
+  if(m < 60) return m + " min";
+  const h = Math.floor(m/60);
+  if(h < 24) return h + " h " + (m%60) + " min";
+  return Math.floor(h/24) + " d " + (h%24) + " h";
 }
 let toastT;
 function toast(msg, tipo="info", ms=2600){
   const t = $("#toast");
   t.textContent = msg; t.className = tipo;
   clearTimeout(toastT);
-  toastT = setTimeout(()=>t.className="hide", ms);
-  if(navigator.vibrate) navigator.vibrate(tipo==="err"?[90,60,90]:50);
-}
-const fmt = ts => new Date(ts).toLocaleString("es-MX",
-  {day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
-function transcurrido(ts){
-  const m = Math.floor((Date.now()-ts)/60000);
-  if(m<60) return m+" min";
-  const h = Math.floor(m/60);
-  if(h<24) return h+" h "+(m%60)+" min";
-  return Math.floor(h/24)+" d "+(h%24)+" h";
-}
-const esc = s => String(s==null?"":s).replace(/[&<>"']/g,
-  c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-
-/* ============ SESIÓN ============ */
-let activa = null;          // persona en turno
-let timerSesion = null;
-const SESION_MS = 90000;
-
-function setActiva(p){
-  activa = p;
-  clearTimeout(timerSesion);
-  if(!p) leidosTurno = [];
-  pintarInicio(); pintarScanInfo();
+  toastT = setTimeout(() => t.className = "hide", ms);
+  if(navigator.vibrate) navigator.vibrate(tipo === "err" ? [90,60,90] : 50);
 }
 
-// Termina el paso 1: cierra la cámara y deja listo el paso 2.
-function abrirPaso2(){
-  paso = "herramienta";
+/* ======================= ESTADO DEL FLUJO ======================= */
+// modo: null | "prestar" | "devolver"
+let modo = null;
+let persona = null;      // persona del turno
+let hechas = [];         // textos de lo registrado en este turno
+let folioPendiente = null;
+let cantCtx = null;
+const esPrestar = () => modo === "prestar";
+
+function inicio(){
+  modo = null; persona = null; hechas = []; folioPendiente = null; cantCtx = null;
   pararCamara();
-  ver("vInicio");
-  pintarInicio();
-}
-
-function terminarTurno(){
-  setActiva(null);
-  paso = "persona";
-  leidosTurno = [];
-  pararCamara();
-  ver("vInicio");
-}
-
-function pintarInicio(){
-  const c = $("#activeCard");
-  if(typeof MODO_REGISTRO !== "undefined" && MODO_REGISTRO){ c.style.display="none"; return; }
-  const bScan = $("#btnScan"), bHerr = $("#btnScanHerr"), bFin = $("#btnTerminarTurno");
-  if(!activa){
-    c.style.display="none";
-    $("#hdrsub").textContent = "Paso 1 · identificar persona";
-    if(bScan){ bScan.classList.remove("hide"); bHerr.classList.add("hide"); bFin.classList.add("hide"); }
-  } else {
-    if(bScan){ bScan.classList.add("hide"); bHerr.classList.remove("hide"); bFin.classList.remove("hide"); }
-    const l = abiertosDe(activa.id);
-    c.style.display="block";
-    c.innerHTML = "<h2>"+esc(activa.nombre)+"</h2><p>"+esc(activa.teams||"")+
-      (activa.teams?" · ":"")+"<span class='mono'>"+esc(activa.id)+"</span></p>" +
-      (l.length ? "<p><b style='color:#f08a86'>Trae "+l.length+" registro"+(l.length>1?"s":"")+" sin devolver</b></p>"
-                : "<p style='color:#5fd39b'>Sin herramienta pendiente</p>")+
-      (leidosTurno.length ? "<p style='color:#5fd39b'>En este turno: "+
-        leidosTurno.map(x=>esc(x)).join(", ")+"</p>" : "");
-    $("#hdrsub").textContent = "Paso 2 · herramientas de "+activa.nombre.split(" ")[0];
-  }
+  $("#hdrTit").textContent = "Almacén de Herramienta";
+  $("#hdrSub").textContent = MODO_REGISTRO ? "Registro de personal" : "¿Qué vas a hacer?";
   pintarResumen();
+  ver("vInicio");
 }
 
 function pintarResumen(){
-  const a = abiertos();
-  const tarde = a.filter(esTarde).length;
+  const a = abiertos(), tarde = a.filter(esTarde).length;
   $("#resumen").innerHTML =
-    "<div class='card'><h2>Estado</h2>"+
-    "<p>"+DB.herramientas.length+" herramientas dadas de alta · "+DB.personas.length+" personas</p>"+
-    "<p><b>"+a.length+"</b> registro"+(a.length===1?"":"s")+" fuera del almacén"+
-    (tarde? " · <span class='pill late'>"+tarde+" con retraso</span>":"")+"</p></div>";
+    "<div class='card'><h2>Estado del almacén</h2>" +
+    "<p><b style='color:" + (a.length ? "#f0b86e" : "#5fd39b") + "'>" + a.length + "</b> " +
+      (a.length === 1 ? "herramienta fuera" : "herramientas fuera") +
+      (tarde ? " · <span class='pill late'>" + tarde + " con retraso</span>" : "") + "</p>" +
+    "<p>" + DB.herramientas.length + " en el catálogo · " + DB.personas.length + " personas</p></div>";
 }
 
-function pintarScanInfo(){
-  const d = $("#scanInfo");
-  if(!activa){
-    d.innerHTML = "<h2>Paso 1</h2><p>Escanea la credencial de la persona.</p>";
-  } else {
-    const l = abiertosDe(activa.id);
-    d.innerHTML = "<h2>"+esc(activa.nombre)+"</h2>"+
-      "<p>Escanea las herramientas. Una ya prestada a esta persona se devuelve sola.</p>"+
-      (l.length? "<p>Trae: "+l.map(p=>{
-          const h=herrPorId(p.herrId);
-          return esc(h?h.nombre:p.herrId)+(p.cant>1?" ×"+p.cant:"");
-        }).join(", ")+"</p>" : "");
-  }
-  const lista = $("#scanLista");
-  if(lista){
-    lista.innerHTML = leidosTurno.length
-      ? "<div class='card'><h2>Registradas en este turno</h2>"+
-        leidosTurno.map(x=>"<div class='item'><div class='t'>"+esc(x)+"</div></div>").join("")+"</div>"
-      : "";
-  }
-}
-
-/* ============ LÓGICA DE ESCANEO ============ */
-let pendiente = null;  // {folio} herramienta por dar de alta
-let cantCtx = null;    // contexto de la pantalla de cantidad
-
-function procesar(codigo, desdeCamara){
-  const crudo = String(codigo||"").trim();
-  if(!crudo) return;
-  const f = crudo.toUpperCase();
-  const esPersona = crudo.startsWith("PER1|") || f.startsWith("PER-");
-  const esHerr    = f.startsWith("HER-");
-
-  // Con la cámara abierta solo se acepta lo que toca en este paso,
-  // para que un código que pase por delante no registre nada por error.
-  if(desdeCamara){
-    if(paso === "persona" && esHerr)
-      return toast("Paso 1: escanea primero la credencial de la persona.","err",3000);
-    if(paso === "herramienta" && esPersona)
-      return toast("Paso 2: escanea las herramientas, no credenciales.","err",3000);
-  }
-
-  if(crudo.startsWith("PER1|")) return procesarPersonaQR(crudo);
-  if(f.startsWith("PER-")) return procesarPersona(f);
-  if(esHerr) return procesarHerramienta(f);
-  toast("Código no reconocido: "+f, "err");
-}
-
-// QR de credencial con datos: da de alta a quien no conozcamos todavía
-function procesarPersonaQR(crudo){
-  const t = crudo.split("|");
-  const id = (t[1]||"").trim();
-  if(!id) return toast("Credencial ilegible","err");
-  let p = perPorId(id);
-  if(!p){
-    p = { id, nombre:(deQR(t[2])||"Sin nombre").trim(), area:"",
-          teams:deQR(t[4]).trim(), creado:Date.now() };
-    DB.personas.push(p); guardar();
-    toast("Alta automática: "+p.nombre, "ok", 3200);
-  } else {
-    toast("Hola "+p.nombre.split(" ")[0], "ok");
-  }
-  if(herrPendiente){ return entregarA(p); }
-  setActiva(p);
-  abrirPaso2();
-}
-
-function procesarPersona(folio){
-  const p = perPorId(folio);
-  if(!p){
-    toast("Credencial no registrada. Regístrate primero.","err",3200);
-    return;
-  }
-  if(herrPendiente){ return entregarA(p); }
-  setActiva(p);
-  toast("Hola "+p.nombre.split(" ")[0]+". Ahora las herramientas.", "ok", 3000);
-  abrirPaso2();
-}
-
-function procesarHerramienta(folio){
-  const h = herrPorId(folio);
-  if(h && leidosTurno.indexOf(h.nombre) >= 0){
-    toast(h.nombre+" ya quedó registrada en este turno.", "info", 2600);
-    return;
-  }
-  if(!h){
-    pendiente = { folio };
-    $("#hFolio").textContent = folio;
-    $("#hNombre").value = ""; $("#hTipo").value="individual";
-    $("#hCantWrap").classList.add("hide"); $("#hCant").value = 10;
-    pararCamara(); ver("vHerr"); $("#hNombre").focus();
-    return;
-  }
-  const mios = abiertos().filter(p=>p.herrId===h.id);
-  const mio  = activa ? mios.find(p=>p.perId===activa.id) : null;
-
-  // Devolución
-  if(mio){
-    if(h.tipo==="lote"){
-      cantCtx = {modo:"devolver", prestamo:mio, herr:h};
-      $("#cTitulo").textContent = "Devolver "+h.nombre;
-      $("#cSub").textContent = activa.nombre+" se llevó "+mio.cant;
-      $("#cLabel").textContent = "¿Cuántas regresa?";
-      $("#cValor").value = mio.cant; $("#cValor").max = mio.cant;
-      pararCamara(); ver("vCant"); return;
-    }
-    mio.regreso = Date.now(); guardar();
-    toast("Devuelto: "+h.nombre, "ok");
-    pintarInicio(); pintarScanInfo(); return;
-  }
-
-  // Está fuera, con otra persona
-  if(mios.length && h.tipo==="individual"){
-    const otro = perPorId(mios[0].perId);
-    toast("La trae "+(otro?otro.nombre:"otra persona")+". Solo esa persona la devuelve.", "err", 4200);
-    return;
-  }
-
-  // Préstamo: si no sabemos quién es, lo preguntamos aquí mismo
-  if(!activa){ return pedirPersona(h); }
-
-  if(h.tipo==="lote"){
-    const d = disp(h);
-    if(d<=0){ toast("No hay disponibles de "+h.nombre, "err"); return; }
-    cantCtx = {modo:"prestar", herr:h};
-    $("#cTitulo").textContent = h.nombre;
-    $("#cSub").textContent = "Disponibles: "+d+" de "+h.total;
-    $("#cLabel").textContent = "¿Cuántas se lleva?";
-    $("#cValor").value = 1; $("#cValor").max = d;
-    pararCamara(); ver("vCant"); return;
-  }
-
-  DB.prestamos.push({ id:"L"+Date.now()+Math.random().toString(36).slice(2,6),
-    perId:activa.id, herrId:h.id, cant:1, salida:Date.now(), regreso:null });
-  guardar();
-  leidosTurno.push(h.nombre);
-  toast("Salió: "+h.nombre, "ok");
-  pintarInicio(); pintarScanInfo();
-}
-
-/* ============ ¿QUIÉN SE LA LLEVA? ============ */
-let herrPendiente = null;
-
-function pedirPersona(h, reciénDadaDeAlta){
-  herrPendiente = h;
-  const d = disp(h);
-  const estado = h.tipo==="lote"
-    ? d+" de "+h.total+" disponibles"
-    : (d>0 ? "En almacén" : "Fuera");
-  $("#quienHerr").innerHTML =
-    "<h2>"+esc(h.nombre)+"</h2>"+
-    "<p><span class='mono'>"+esc(h.id)+"</span> · "+
-    (h.tipo==="lote"?"por tipo":"individual")+" · "+estado+"</p>"+
-    "<p class='pill ok' style='display:inline-block'>"+
-    (reciénDadaDeAlta ? "AÑADIDA AL CATÁLOGO" : "YA ESTABA DADA DE ALTA")+"</p>";
-  $("#quienBuscar").value = "";
+/* ---------- PASO 1: identificar a la persona ---------- */
+function irPaso1(m){
+  modo = m; persona = null; hechas = [];
+  const dev = !esPrestar();
+  $("#barra1").classList.toggle("dev", dev);
+  $("#k1").textContent = dev ? "Devolver" : "Prestar";
+  $("#hdrTit").textContent = dev ? "Devolver herramienta" : "Prestar herramienta";
+  $("#hdrSub").textContent = "Paso 1 de 2 · identificar persona";
+  $("#ayuda1").textContent = dev
+    ? "Acerca la credencial de quien regresa la herramienta."
+    : "Acerca la credencial de quien se lleva la herramienta.";
+  $("#buscarPersona").value = "";
   pintarListaPersonas("");
-  pararCamara();
-  ver("vQuien");
+  ver("vPaso1");
+  moverCamara("#scanwrap1");
+  iniciarCamara();
 }
 
 function pintarListaPersonas(filtro){
   const f = filtro.trim().toLowerCase();
-  let ps = DB.personas.slice();
-  if(f) ps = ps.filter(p => (p.nombre+" "+(p.teams||"")).toLowerCase().includes(f));
-  ps = ps.slice(0, 12);
-  const cont = $("#quienLista");
+  const cont = $("#listaPersonas");
   if(!DB.personas.length){
-    cont.innerHTML = "<div class='empty'>Todavía no hay nadie registrado.<br>Escanea su credencial o regístralo abajo.</div>";
+    cont.innerHTML = "<div class='empty'>Todavía no hay nadie registrado.<br>Escanea una credencial o registra a la persona aquí abajo.</div>";
     return;
   }
+  let ps = DB.personas.slice();
+  if(f) ps = ps.filter(p => (p.nombre + " " + (p.teams||"")).toLowerCase().includes(f));
+  if(!f) ps = ps.slice(0, 6);
+  ps = ps.slice(0, 15);
   if(!ps.length){ cont.innerHTML = "<div class='empty'>Nadie coincide con esa búsqueda.</div>"; return; }
-  cont.innerHTML = "<div class='card' style='margin-top:10px'>"+ps.map(p=>
-    "<div class='item' data-per='"+esc(p.id)+"' style='cursor:pointer'>"+
-    "<div class='t'>"+esc(p.nombre)+"</div>"+
-    "<div class='s'>"+esc(p.teams||"")+"</div></div>").join("")+"</div>";
+  cont.innerHTML = "<div class='card' style='margin-top:10px'>" + ps.map(p => {
+    const n = abiertosDe(p.id).length;
+    return "<div class='item tap' data-per='" + esc(p.id) + "'>" +
+      "<div class='t'>" + esc(p.nombre) + (n ? " <span class='pill out'>" + n + " fuera</span>" : "") + "</div>" +
+      "<div class='s'>" + esc(p.teams||"") + "</div></div>";
+  }).join("") + "</div>";
 }
 
-function entregarA(p){
-  if(!herrPendiente) return ver("vInicio");
-  const h = herrPendiente; herrPendiente = null;
-  setActiva(p);
-  procesarHerramienta(h.id);
+function elegirPersona(p){
+  persona = p;
+  if(!esPrestar() && !abiertosDe(p.id).length){
+    toast(p.nombre.split(" ")[0] + " no tiene herramienta pendiente.", "err", 3600);
+    return;
+  }
+  irPaso2();
 }
 
-/* ============ CÁMARA ============ */
-let stream=null, rafId=null, lastCode="", lastTime=0, detector=null, veniaCamara=false;
-let paso = "persona";              // "persona" | "herramienta"
-let leidosTurno = [];              // herramientas ya registradas en este turno
+/* ---------- PASO 2: herramientas ---------- */
+function irPaso2(){
+  const dev = !esPrestar();
+  $("#barra2").classList.toggle("dev", dev);
+  $("#k2").textContent = dev ? "Devolver" : "Prestar";
+  $("#v2").textContent = dev ? "¿Qué regresa " + persona.nombre.split(" ")[0] + "?"
+                             : "¿Qué se lleva " + persona.nombre.split(" ")[0] + "?";
+  $("#hdrTit").textContent = persona.nombre;
+  $("#hdrSub").textContent = "Paso 2 de 2 · " + (dev ? "herramientas que regresa" : "herramientas que se lleva");
+  $("#ayuda2").textContent = dev
+    ? "Escanea la etiqueta de cada herramienta que regresa."
+    : "Escanea la etiqueta de cada herramienta. Puedes escanear varias seguidas.";
+  $("#btnListo").className = "big" + (dev ? " ambar" : "");
+  pintarTurno();
+  ver("vPaso2");
+  moverCamara("#scanwrap2");
+  iniciarCamara();
+}
+
+function pintarTurno(){
+  const pend = abiertosDe(persona ? persona.id : "");
+  let html = "";
+  if(hechas.length){
+    html += "<div class='card'><h2>" + (esPrestar() ? "Se lleva" : "Regresó") + "</h2>" +
+      hechas.map(x => "<div class='item'><div class='t'>✓ " + esc(x) + "</div></div>").join("") + "</div>";
+  }
+  if(!esPrestar() && pend.length){
+    html += "<div class='card'><h2>Le falta regresar</h2>" + pend.map(p => {
+      const h = herrPorId(p.herrId);
+      return "<div class='item'><div class='t'>" + esc(h ? h.nombre : p.herrId) +
+        (p.cant > 1 ? " ×" + p.cant : "") + "</div>" +
+        "<div class='s'><span class='mono'>" + esc(p.herrId) + "</span> · hace " + transcurrido(p.salida) + "</div></div>";
+    }).join("") + "</div>";
+  }
+  if(esPrestar() && pend.length){
+    html += "<div class='card'><h2>Ya traía de antes</h2>" + pend.map(p => {
+      const h = herrPorId(p.herrId);
+      return "<div class='item" + (esTarde(p) ? " late" : "") + "'><div class='t'>" +
+        esc(h ? h.nombre : p.herrId) + (p.cant > 1 ? " ×" + p.cant : "") +
+        (esTarde(p) ? " <span class='pill late'>RETRASO</span>" : "") + "</div></div>";
+    }).join("") + "</div>";
+  }
+  $("#listaTurno").innerHTML = html;
+}
+
+/* ---------- procesar un código ---------- */
+function procesar(codigo, desdeCamara){
+  const crudo = String(codigo||"").trim();
+  if(!crudo) return;
+  const f = crudo.toUpperCase();
+  const esPersonaQR = crudo.startsWith("PER1|") || f.startsWith("PER-");
+  const esHerr = f.startsWith("HER-");
+  const enPaso1 = !$("#vPaso1").classList.contains("hide");
+  const enPaso2 = !$("#vPaso2").classList.contains("hide");
+
+  // Cada paso acepta solo lo suyo: así un código que pase por delante no registra nada.
+  if(desdeCamara){
+    if(enPaso1 && esHerr) return toast("Primero la credencial de la persona.", "err", 3000);
+    if(enPaso2 && esPersonaQR) return toast("Ahora las herramientas, no credenciales.", "err", 3000);
+  }
+
+  if(esPersonaQR){
+    const p = crudo.startsWith("PER1|") ? personaDeQR(crudo) : perPorId(f);
+    if(!p) return toast("Credencial no registrada.", "err", 3200);
+    if(enPaso1) return elegirPersona(p);
+    return toast("Credencial de " + p.nombre, "info");
+  }
+  if(esHerr) return herramienta(f);
+  toast("Código no reconocido: " + f, "err");
+}
+
+function personaDeQR(crudo){
+  const t = crudo.split("|");
+  const id = (t[1]||"").trim();
+  if(!id) return null;
+  let p = perPorId(id);
+  if(!p){
+    p = { id, nombre: (deQR(t[2])||"Sin nombre").trim(), teams: deQR(t[4]).trim(), creado: Date.now() };
+    DB.personas.push(p); guardar();
+    toast("Alta automática: " + p.nombre, "ok", 3000);
+  }
+  return p;
+}
+
+function herramienta(folio){
+  const h = herrPorId(folio);
+
+  // etiqueta sin bautizar
+  if(!h){
+    if(!esPrestar()) return toast("Esa herramienta no está registrada, así que no hay nada que devolver.", "err", 4000);
+    folioPendiente = folio;
+    $("#hFolio").textContent = folio;
+    $("#hNombre").value = ""; $("#hTipo").value = "individual";
+    $("#hCantWrap").classList.add("hide"); $("#hCant").value = 10;
+    pararCamara(); ver("vHerr"); $("#hNombre").focus();
+    return;
+  }
+
+  const mio = abiertos().find(p => p.herrId === h.id && p.perId === persona.id);
+
+  if(esPrestar()){
+    if(mio) return toast(h.nombre + ": ya la trae " + persona.nombre.split(" ")[0] + ".", "info", 3000);
+    const ocupada = abiertos().find(p => p.herrId === h.id);
+    if(h.tipo === "individual" && ocupada){
+      const otro = perPorId(ocupada.perId);
+      return toast("La trae " + (otro ? otro.nombre : "otra persona") + ".", "err", 4000);
+    }
+    if(h.tipo === "lote"){
+      const d = disp(h);
+      if(d <= 0) return toast("No hay disponibles de " + h.nombre + ".", "err", 3200);
+      return pedirCantidad("prestar", h, 1, d, "¿Cuántas se lleva?", "Disponibles: " + d + " de " + h.total);
+    }
+    DB.prestamos.push({ id: nuevoIdPrestamo(), perId: persona.id, herrId: h.id,
+      cant: 1, salida: Date.now(), regreso: null });
+    guardar(); hechas.push(h.nombre);
+    toast("Salió: " + h.nombre, "ok");
+    pintarTurno();
+    return;
+  }
+
+  // devolver
+  if(!mio){
+    const ocupada = abiertos().find(p => p.herrId === h.id);
+    if(!ocupada) return toast(h.nombre + " ya estaba en el almacén.", "info", 3000);
+    const otro = perPorId(ocupada.perId);
+    return toast("Esa la trae " + (otro ? otro.nombre : "otra persona") + ", no " +
+      persona.nombre.split(" ")[0] + ".", "err", 4200);
+  }
+  if(h.tipo === "lote"){
+    return pedirCantidad("devolver", h, mio.cant, mio.cant, "¿Cuántas regresa?",
+      "Se llevó " + mio.cant, mio);
+  }
+  mio.regreso = Date.now(); guardar();
+  hechas.push(h.nombre);
+  toast("Devuelto: " + h.nombre, "ok");
+  pintarTurno();
+}
+
+const nuevoIdPrestamo = () => "L" + Date.now() + Math.random().toString(36).slice(2,6);
+
+function pedirCantidad(accion, h, valor, max, etiqueta, sub, prestamo){
+  cantCtx = { accion, herr: h, prestamo };
+  $("#cTitulo").textContent = h.nombre;
+  $("#cSub").textContent = sub;
+  $("#cLabel").textContent = etiqueta;
+  $("#cValor").value = valor; $("#cValor").max = max;
+  pararCamara(); ver("vCant");
+}
+
+function terminar(){
+  pararCamara();
+  const n = hechas.length;
+  const dev = !esPrestar();
+  $("#finCard").innerHTML =
+    "<div class='tick'>" + (n ? "✅" : "👍") + "</div>" +
+    "<h2>" + (n ? (dev ? "Devolución registrada" : "Préstamo registrado") : "Sin cambios") + "</h2>" +
+    (n ? "<p><b>" + esc(persona.nombre) + "</b></p>" +
+         "<p>" + n + (n === 1 ? " herramienta " : " herramientas ") + (dev ? "devueltas" : "entregadas") + "</p>" +
+         "<p style='margin-top:8px;color:#5fd39b'>" + hechas.map(esc).join(" · ") + "</p>"
+       : "<p>No se registró ninguna herramienta.</p>");
+  $("#hdrTit").textContent = "Listo";
+  $("#hdrSub").textContent = "";
+  ver("vFin");
+}
+
+/* ======================= CÁMARA ======================= */
+let stream = null, rafId = null, lastCode = "", lastTime = 0, detector = null;
 const canvas = document.createElement("canvas");
-const ctx = canvas.getContext("2d", {willReadFrequently:true});
-
+const cctx = canvas.getContext("2d", { willReadFrequently: true });
 const hayCamara = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
                   && (window.isSecureContext !== false);
-async function iniciarCamara(modo){
-  if(modo) paso = modo;
+
+// un solo bloque de cámara que se mueve entre los pasos
+const camBox = document.createElement("div");
+camBox.id = "scanwrap";
+camBox.innerHTML = '<video id="video" playsinline muted></video><div id="reticle"></div>' +
+                   '<div id="scanmsg">Acerca el código</div>';
+function moverCamara(sel){
+  const destino = $(sel);
+  if(destino && camBox.parentNode !== destino){ destino.innerHTML = ""; destino.appendChild(camBox); }
+}
+
+async function iniciarCamara(){
   if(!hayCamara){
-    toast("Esta vista no tiene acceso a la cámara. Usa 'Teclear folio'.","err",4600);
-    veniaCamara = false;
-    $("#mFolio").value=""; ver("vManual"); $("#mFolio").focus();
+    $("#scanmsg").textContent = "Sin cámara en esta vista";
     return;
   }
-  veniaCamara = true;
-  ver("vScan"); pintarScanInfo();
+  if(stream) return;
   $("#scanmsg").textContent = "Abriendo cámara...";
   try{
     stream = await navigator.mediaDevices.getUserMedia({
-      video:{ facingMode:{ideal:"environment"}, width:{ideal:1280}, height:{ideal:1280} },
-      audio:false
+      video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 1280 } },
+      audio: false
     });
   }catch(e){
     $("#scanmsg").textContent = "Sin acceso a la cámara";
-    toast("No se pudo abrir la cámara. Da permiso en el navegador o usa 'Teclear folio'.","err",5200);
+    toast("Da permiso de cámara al navegador, o usa 'Teclear folio'.", "err", 5200);
     return;
   }
   const v = $("#video");
   v.srcObject = stream; await v.play().catch(()=>{});
-  $("#scanmsg").textContent = paso==="persona" ? "Acerca la credencial" : "Acerca la etiqueta de la herramienta";
+  $("#scanmsg").textContent = "Acerca el código";
   if("BarcodeDetector" in window){
-    try{ detector = new BarcodeDetector({formats:["qr_code"]}); }catch(e){ detector=null; }
+    try{ detector = new BarcodeDetector({ formats: ["qr_code"] }); }catch(e){ detector = null; }
   }
   bucle();
 }
 function pararCamara(){
-  cancelAnimationFrame(rafId); rafId=null;
-  if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
-  const v=$("#video"); if(v) v.srcObject=null;
+  cancelAnimationFrame(rafId); rafId = null;
+  if(stream){ stream.getTracks().forEach(t => t.stop()); stream = null; }
+  const v = $("#video"); if(v) v.srcObject = null;
+  lastCode = "";
 }
 async function bucle(){
+  if(!stream) return;
   const v = $("#video");
-  if(!stream){ return; }
-  if(v.readyState >= 2 && v.videoWidth){
+  if(v && v.readyState >= 2 && v.videoWidth){
     let code = null;
     if(detector){
-      try{ const r = await detector.detect(v); if(r&&r.length) code = r[0].rawValue; }
+      try{ const r = await detector.detect(v); if(r && r.length) code = r[0].rawValue; }
       catch(e){ detector = null; }
     }
     if(!code){
       const w = 520, s = Math.min(v.videoWidth, v.videoHeight);
       canvas.width = w; canvas.height = w;
-      ctx.drawImage(v, (v.videoWidth-s)/2, (v.videoHeight-s)/2, s, s, 0, 0, w, w);
-      const img = ctx.getImageData(0,0,w,w);
+      cctx.drawImage(v, (v.videoWidth-s)/2, (v.videoHeight-s)/2, s, s, 0, 0, w, w);
+      const img = cctx.getImageData(0,0,w,w);
       if(typeof jsQR === "function"){
-        const r = jsQR(img.data, w, w, {inversionAttempts:"dontInvert"});
+        const r = jsQR(img.data, w, w, { inversionAttempts: "dontInvert" });
         if(r) code = r.data;
       }
     }
     if(code){
       const ahora = Date.now();
-      if(code !== lastCode || ahora-lastTime > 2200){
+      if(code !== lastCode || ahora - lastTime > 2500){
         lastCode = code; lastTime = ahora;
-        $("#scanmsg").textContent = code;
         procesar(code, true);
       }
     }
@@ -655,151 +696,136 @@ async function bucle(){
   rafId = requestAnimationFrame(bucle);
 }
 
-/* ============ QR DE PERSONA ============ */
-function dibujarQR(cont, texto){
-  const qr = qrcode(0, "H");
-  qr.addData(texto); qr.make();
-  cont.innerHTML = qr.createImgTag(8, 16);
+/* ======================= QR ======================= */
+function qrTag(texto, px){
+  const qr = qrcode(0, "H"); qr.addData(texto); qr.make();
+  return qr.createImgTag(px || 8, 16);
 }
 function qrDataURL(texto, escala){
-  const qr = qrcode(0,"H"); qr.addData(texto); qr.make();
-  const n = qr.getModuleCount(), b = 4, px = escala||14;
+  const qr = qrcode(0, "H"); qr.addData(texto); qr.make();
+  const n = qr.getModuleCount(), b = 4, px = escala || 14;
   const cv = document.createElement("canvas");
-  cv.width = cv.height = (n+b*2)*px;
+  cv.width = cv.height = (n + b*2) * px;
   const c = cv.getContext("2d");
-  c.fillStyle="#fff"; c.fillRect(0,0,cv.width,cv.height);
-  c.fillStyle="#000";
+  c.fillStyle = "#fff"; c.fillRect(0,0,cv.width,cv.height);
+  c.fillStyle = "#000";
   for(let r=0;r<n;r++) for(let col=0;col<n;col++)
-    if(qr.isDark(r,col)) c.fillRect((col+b)*px,(r+b)*px,px,px);
+    if(qr.isDark(r,col)) c.fillRect((col+b)*px, (r+b)*px, px, px);
   return cv.toDataURL("image/png");
 }
-
 let personaQR = null;
 function mostrarQRPersona(p){
   personaQR = p;
   $("#qrNombre").textContent = p.nombre;
-  $("#qrDatos").innerHTML = "<span class='mono'>"+esc(p.id)+"</span>" +
-    (p.teams? "<br>"+esc(p.teams) : "");
-  dibujarQR($("#qrbox"), codigoPersona(p));
+  $("#qrDatos").innerHTML = "<span class='mono'>" + esc(p.id) + "</span>" + (p.teams ? "<br>" + esc(p.teams) : "");
+  $("#qrbox").innerHTML = qrTag(codigoPersona(p), 8);
+  $("#hdrTit").textContent = "Credencial";
+  $("#hdrSub").textContent = p.nombre;
   ver("vQR");
 }
 
-/* ============ PANEL ============ */
-let tabActual = "fuera";
-function abrirPanel(){ ver("vPanel"); pintarPanel(); }
+/* ======================= PANEL ======================= */
+let tab = "fuera";
 function pintarPanel(){
-  document.querySelectorAll(".tabs button").forEach(b=>
-    b.classList.toggle("on", b.dataset.tab===tabActual));
+  document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
   const b = $("#panelBody");
-  if(tabActual==="fuera")  return b.innerHTML = tabFuera();
-  if(tabActual==="herr")   return b.innerHTML = tabHerr();
-  if(tabActual==="per")    return b.innerHTML = tabPer();
-  if(tabActual==="hist")   return b.innerHTML = tabHist();
-  if(tabActual==="conf")   { b.innerHTML = tabConf(); engancharConf(); }
+  if(tab === "fuera") b.innerHTML = tabFuera();
+  else if(tab === "herr") b.innerHTML = tabHerr();
+  else if(tab === "per") b.innerHTML = tabPer();
+  else if(tab === "hist") b.innerHTML = tabHist();
+  else { b.innerHTML = tabConf(); engancharConf(); }
 }
 function tabFuera(){
-  const a = abiertos().sort((x,y)=>x.salida-y.salida);
+  const a = abiertos().sort((x,y) => x.salida - y.salida);
   if(!a.length) return "<div class='empty'>Nada fuera del almacén.<br>Todo está devuelto.</div>";
-  return "<div class='card'>"+a.map(p=>{
+  return "<div class='card'>" + a.map(p => {
     const h = herrPorId(p.herrId), per = perPorId(p.perId), t = esTarde(p);
-    return "<div class='item"+(t?" late":"")+"'>"+
-      "<div class='t'>"+esc(h?h.nombre:p.herrId)+(p.cant>1?" ×"+p.cant:"")+
-      (t?" <span class='pill late'>RETRASO</span>":"")+"</div>"+
-      "<div class='s'>"+esc(per?per.nombre:p.perId)+
-      "</div>"+
-      "<div class='s'>Salió "+fmt(p.salida)+" · hace "+transcurrido(p.salida)+
-      " · <span class='mono'>"+esc(p.herrId)+"</span></div>"+
-      (per&&per.teams? "<div class='s'>"+esc(per.teams)+"</div>":"")+
-      "</div>";
-  }).join("")+"</div>";
+    return "<div class='item" + (t ? " late" : "") + "'>" +
+      "<div class='t'>" + esc(h ? h.nombre : p.herrId) + (p.cant > 1 ? " ×" + p.cant : "") +
+      (t ? " <span class='pill late'>RETRASO</span>" : "") + "</div>" +
+      "<div class='s'>" + esc(per ? per.nombre : p.perId) + "</div>" +
+      "<div class='s'>Salió " + fmt(p.salida) + " · hace " + transcurrido(p.salida) +
+      " · <span class='mono'>" + esc(p.herrId) + "</span></div>" +
+      (per && per.teams ? "<div class='s'>" + esc(per.teams) + "</div>" : "") + "</div>";
+  }).join("") + "</div>";
 }
 function tabHerr(){
-  if(!DB.herramientas.length) return "<div class='empty'>Aún no hay herramientas.<br>Escanea una etiqueta HER para darla de alta.</div>";
-  return "<div class='card'>"+DB.herramientas.map(h=>{
+  if(!DB.herramientas.length) return "<div class='empty'>Aún no hay herramientas.<br>Se dan de alta al escanear su etiqueta por primera vez.</div>";
+  return "<div class='card'>" + DB.herramientas.map(h => {
     const d = disp(h), f = fuera(h.id);
-    const pill = h.tipo==="lote"
-      ? "<span class='pill "+(d>0?"ok":"out")+"'>"+d+" de "+h.total+"</span>"
-      : (f? "<span class='pill out'>FUERA</span>" : "<span class='pill ok'>EN ALMACÉN</span>");
-    return "<div class='item'><div class='t'>"+esc(h.nombre)+" "+pill+"</div>"+
-      "<div class='s'><span class='mono'>"+esc(h.id)+"</span> · "+
-      (h.tipo==="lote"?"por tipo":"individual")+"</div></div>";
-  }).join("")+"</div>";
+    const pill = h.tipo === "lote"
+      ? "<span class='pill " + (d > 0 ? "ok" : "out") + "'>" + d + " de " + h.total + "</span>"
+      : (f ? "<span class='pill out'>FUERA</span>" : "<span class='pill ok'>EN ALMACÉN</span>");
+    return "<div class='item'><div class='t'>" + esc(h.nombre) + " " + pill + "</div>" +
+      "<div class='s'><span class='mono'>" + esc(h.id) + "</span> · " +
+      (h.tipo === "lote" ? "por tipo" : "individual") + "</div></div>";
+  }).join("") + "</div>";
 }
 function tabPer(){
   if(!DB.personas.length) return "<div class='empty'>Aún no hay personas registradas.</div>";
-  return "<div class='card'>"+DB.personas.map(p=>{
+  return "<div class='card'>" + DB.personas.map(p => {
     const n = abiertosDe(p.id).length;
-    return "<div class='item'><div class='t'>"+esc(p.nombre)+
-      (n?" <span class='pill out'>"+n+" fuera</span>":"")+"</div>"+
-      "<div class='s'><span class='mono'>"+esc(p.id)+"</span></div>"+
-      (p.teams?"<div class='s'>"+esc(p.teams)+"</div>":"")+
-      "<div class='s'><a href='#' data-qr='"+esc(p.id)+"' style='color:#5fd39b'>Ver su QR</a></div>"+
-      "</div>";
-  }).join("")+"</div>";
+    return "<div class='item'><div class='t'>" + esc(p.nombre) +
+      (n ? " <span class='pill out'>" + n + " fuera</span>" : "") + "</div>" +
+      "<div class='s'>" + esc(p.teams||"") + " · <span class='mono'>" + esc(p.id) + "</span></div>" +
+      "<div class='s'><a href='#' data-qr='" + esc(p.id) + "' style='color:#5fd39b'>Ver su credencial</a></div></div>";
+  }).join("") + "</div>";
 }
 function tabHist(){
-  const h = DB.prestamos.filter(p=>p.regreso).sort((a,b)=>b.regreso-a.regreso).slice(0,120);
+  const h = DB.prestamos.filter(p => p.regreso).sort((a,b) => b.regreso - a.regreso).slice(0,120);
   if(!h.length) return "<div class='empty'>Todavía no hay devoluciones registradas.</div>";
-  return "<div class='card'>"+h.map(p=>{
+  return "<div class='card'>" + h.map(p => {
     const t = herrPorId(p.herrId), per = perPorId(p.perId);
-    return "<div class='item'><div class='t'>"+esc(t?t.nombre:p.herrId)+(p.cant>1?" ×"+p.cant:"")+"</div>"+
-      "<div class='s'>"+esc(per?per.nombre:p.perId)+"</div>"+
-      "<div class='s'>"+fmt(p.salida)+" → "+fmt(p.regreso)+"</div></div>";
-  }).join("")+"</div>";
+    return "<div class='item'><div class='t'>" + esc(t ? t.nombre : p.herrId) +
+      (p.cant > 1 ? " ×" + p.cant : "") + "</div>" +
+      "<div class='s'>" + esc(per ? per.nombre : p.perId) + "</div>" +
+      "<div class='s'>" + fmt(p.salida) + " → " + fmt(p.regreso) + "</div></div>";
+  }).join("") + "</div>";
 }
 function tabConf(){
-  return "<div class='card'><h2>Ajustes</h2>"+
-    "<label>PIN de administrador</label><input id='cfPin' class='mono' value='"+esc(DB.config.pin)+"' inputmode='numeric' maxlength='8'>"+
-    "<label>Marcar en rojo después de (horas)</label><input id='cfHoras' type='number' inputmode='numeric' min='1' value='"+DB.config.horasAlerta+"'>"+
-    "<div style='height:14px'></div><button class='sec' id='cfGuardar'>Guardar ajustes</button>"+
-    "</div>"+
-    "<div class='card'><h2>Respaldo</h2>"+
-    "<p>Todo vive en este celular. Exporta seguido para no perderlo si se pierde o se formatea el equipo.</p>"+
-    "<button class='sec' id='cfCSV'>Exportar CSV de movimientos</button>"+
-    "<button class='sec' id='cfJSON'>Exportar respaldo completo</button>"+
-    "<button class='sec' id='cfImport'>Importar respaldo</button>"+
-    "<input type='file' id='cfFile' accept='.json,application/json' class='hide'>"+
-    "</div>"+
-    "<div class='card'><h2>Credenciales</h2>"+
-    "<p>Hoja con los QR de todas las personas registradas, lista para imprimir.</p>"+
-    "<button class='sec' id='cfHoja'>Hoja de credenciales</button>"+
-    "<p style='margin-top:12px'>Liga para que el personal se registre desde su propio celular. Ahí solo ven el formulario, no el escáner.</p>"+
-    "<button class='sec' id='cfLiga'>Ver liga de registro</button></div>"+
-    "<div class='card'><h2>Etiquetas de herramienta</h2>"+
-    "<p>Imprime las etiquetas con el nombre de cada herramienta ya dada de alta, para pegarlas encima de las provisionales.</p>"+
-    "<button class='sec' id='cfEtiquetas'>Imprimir etiquetas con nombre</button></div>"+
-    "<div class='card'><h2>Zona de riesgo</h2>"+
-    "<p>Borra todo: personas, herramientas e historial. No se puede deshacer.</p>"+
+  return "<div class='card'><h2>Ajustes</h2>" +
+    "<label>PIN de administrador</label><input id='cfPin' class='mono' value='" + esc(DB.config.pin) + "' inputmode='numeric' maxlength='8'>" +
+    "<label>Marcar en rojo después de (horas)</label><input id='cfHoras' type='number' inputmode='numeric' min='1' value='" + DB.config.horasAlerta + "'>" +
+    "<div style='height:12px'></div><button class='sec' id='cfGuardar'>Guardar ajustes</button></div>" +
+    "<div class='card'><h2>Respaldo</h2>" +
+    "<p>Todo vive en este celular. Exporta seguido para no perderlo.</p>" +
+    "<button class='sec' id='cfCSV'>Exportar CSV de movimientos</button>" +
+    "<button class='sec' id='cfJSON'>Exportar respaldo completo</button>" +
+    "<button class='sec' id='cfImport'>Importar respaldo</button>" +
+    "<input type='file' id='cfFile' accept='.json,application/json' class='hide'></div>" +
+    "<div class='card'><h2>Impresiones</h2>" +
+    "<button class='sec' id='cfHoja'>Hoja de credenciales</button>" +
+    "<button class='sec' id='cfEtiquetas'>Etiquetas de herramienta con nombre</button>" +
+    "<button class='sec' id='cfLiga'>Liga para que el personal se registre</button></div>" +
+    "<div class='card'><h2>Zona de riesgo</h2>" +
+    "<p>Borra personas, herramientas e historial. No se puede deshacer.</p>" +
     "<button class='sec' id='cfBorrar' style='border-color:#6a2b28;color:#f08a86'>Borrar todos los datos</button></div>";
 }
-
 function engancharConf(){
-  $("#cfGuardar").onclick = ()=>{
-    const pin = $("#cfPin").value.trim();
-    const hrs = parseInt($("#cfHoras").value,10);
-    if(!/^\d{4,8}$/.test(pin)) return toast("El PIN debe ser de 4 a 8 dígitos","err");
-    if(!(hrs>0)) return toast("Horas inválidas","err");
+  $("#cfGuardar").onclick = () => {
+    const pin = $("#cfPin").value.trim(), hrs = parseInt($("#cfHoras").value,10);
+    if(!/^\d{4,8}$/.test(pin)) return toast("El PIN debe ser de 4 a 8 dígitos", "err");
+    if(!(hrs > 0)) return toast("Horas inválidas", "err");
     DB.config.pin = pin; DB.config.horasAlerta = hrs; guardar();
-    toast("Ajustes guardados","ok");
+    toast("Ajustes guardados", "ok");
   };
   $("#cfCSV").onclick = exportarCSV;
   $("#cfJSON").onclick = exportarJSON;
-  $("#cfImport").onclick = ()=> $("#cfFile").click();
+  $("#cfImport").onclick = () => $("#cfFile").click();
   $("#cfFile").onchange = importarJSON;
   $("#cfHoja").onclick = hojaCredenciales;
-  $("#cfLiga").onclick = mostrarLigaRegistro;
   $("#cfEtiquetas").onclick = hojaEtiquetas;
-  $("#cfBorrar").onclick = ()=>{
-    if(!confirm("¿Borrar TODO? Personas, herramientas e historial. No se puede deshacer.")) return;
+  $("#cfLiga").onclick = ligaRegistro;
+  $("#cfBorrar").onclick = () => {
+    if(!confirm("¿Borrar TODO? No se puede deshacer.")) return;
     if(!confirm("Última confirmación. ¿Seguro?")) return;
-    DB = clon(DEF); guardar(); setActiva(null); pintarPanel();
-    toast("Datos borrados","info");
+    DB = clon(DEF); guardar(); pintarPanel(); toast("Datos borrados", "info");
   };
 }
 
-/* ============ EXPORTAR ============ */
+/* ======================= EXPORTAR E IMPRIMIR ======================= */
 async function bajar(nombre, contenido, tipo){
-  const blob = new Blob([contenido], {type:tipo});
+  const blob = new Blob([contenido], { type: tipo });
   try{
     if(window.claude && claude.use){
       const d = await claude.use("downloads");
@@ -809,28 +835,27 @@ async function bajar(nombre, contenido, tipo){
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url; a.download = nombre; document.body.appendChild(a); a.click();
-  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 1500);
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1500);
 }
 const cell = v => '"' + String(v==null?"":v).replace(/"/g,'""') + '"';
 function exportarCSV(){
   const filas = [["folio_herramienta","herramienta","tipo","cantidad","folio_persona","persona","teams","salida","regreso","estado","horas_fuera"]];
-  DB.prestamos.slice().sort((a,b)=>b.salida-a.salida).forEach(p=>{
-    const h = herrPorId(p.herrId), per = perPorId(p.perId);
-    const fin = p.regreso || Date.now();
+  DB.prestamos.slice().sort((a,b) => b.salida - a.salida).forEach(p => {
+    const h = herrPorId(p.herrId), per = perPorId(p.perId), fin = p.regreso || Date.now();
     filas.push([p.herrId, h?h.nombre:"", h?h.tipo:"", p.cant||1, p.perId, per?per.nombre:"",
       per?per.teams:"", fmt(p.salida), p.regreso?fmt(p.regreso):"",
-      p.regreso?"devuelto":(esTarde(p)?"FUERA CON RETRASO":"fuera"),
-      ((fin-p.salida)/3600e3).toFixed(1)]);
+      p.regreso ? "devuelto" : (esTarde(p) ? "FUERA CON RETRASO" : "fuera"),
+      ((fin - p.salida)/3600e3).toFixed(1)]);
   });
-  if(filas.length===1) return toast("No hay movimientos que exportar","info");
-  bajar("movimientos_herramienta.csv", "\uFEFF"+filas.map(f=>f.map(cell).join(",")).join("\r\n"),
+  if(filas.length === 1) return toast("No hay movimientos que exportar", "info");
+  bajar("movimientos_herramienta.csv", "\uFEFF" + filas.map(f => f.map(cell).join(",")).join("\r\n"),
     "text/csv;charset=utf-8");
-  toast("CSV generado","ok");
+  toast("CSV generado", "ok");
 }
 function exportarJSON(){
-  bajar("respaldo_almacen_"+new Date().toISOString().slice(0,10)+".json",
+  bajar("respaldo_almacen_" + new Date().toISOString().slice(0,10) + ".json",
     JSON.stringify(DB,null,1), "application/json");
-  toast("Respaldo generado","ok");
+  toast("Respaldo generado", "ok");
 }
 function importarJSON(ev){
   const f = ev.target.files && ev.target.files[0];
@@ -842,235 +867,224 @@ function importarJSON(ev){
       if(!d || !Array.isArray(d.personas) || !Array.isArray(d.herramientas) || !Array.isArray(d.prestamos))
         throw new Error("formato");
       if(!confirm("Esto reemplaza todos los datos de este celular. ¿Continuar?")) return;
-      DB = Object.assign(clon(DEF), d,
-        {config:Object.assign(clon(DEF.config), d.config||{})});
-      guardar(); setActiva(null); pintarPanel(); toast("Respaldo importado","ok");
-    }catch(e){ toast("Archivo inválido","err"); }
+      DB = Object.assign(clon(DEF), d, { config: Object.assign(clon(DEF.config), d.config||{}) });
+      guardar(); pintarPanel(); toast("Respaldo importado", "ok");
+    }catch(e){ toast("Archivo inválido", "err"); }
   };
   fr.readAsText(f);
   ev.target.value = "";
 }
-function hojaCredenciales(){
-  if(!DB.personas.length) return toast("No hay personas registradas","info");
-  const tarjetas = DB.personas.map(p =>
-    "<div class='c'><img src='"+qrDataURL(codigoPersona(p),8)+"'><div class='n'>"+esc(p.nombre)+
-    "</div><div class='a'>"+esc(p.teams||"")+"</div><div class='f'>"+esc(p.id)+"</div></div>").join("");
-  ventana("Credenciales",
-    "@page{size:letter;margin:10mm}body{font-family:system-ui,sans-serif;margin:0}"+
-    ".g{display:flex;flex-wrap:wrap;gap:4mm}"+
-    ".c{width:58mm;border:1px dashed #999;border-radius:3mm;padding:3mm;text-align:center;page-break-inside:avoid}"+
-    ".c img{width:40mm;height:40mm}"+
-    ".n{font-weight:700;font-size:11pt;margin-top:1mm;line-height:1.2}"+
-    ".a{font-size:8pt;color:#555}.f{font-family:monospace;font-size:9pt;margin-top:1mm}",
-    "<div class='g'>"+tarjetas+"</div>");
-}
-
 function ventana(titulo, estilo, cuerpo){
   const w = window.open("", "_blank");
-  if(!w){ toast("El navegador bloqueó la ventana. Permite ventanas emergentes.","err",4200); return null; }
-  w.document.write("<!doctype html><html><head><meta charset='utf-8'><title>"+titulo+
-    "</title><style>"+estilo+"</style></head><body>"+cuerpo+"</body></html>");
+  if(!w){ toast("El navegador bloqueó la ventana. Permite ventanas emergentes.", "err", 4200); return null; }
+  w.document.write("<!doctype html><html><head><meta charset='utf-8'><title>" + titulo +
+    "</title><style>" + estilo + "</style></head><body>" + cuerpo + "</body></html>");
   w.document.close();
-  setTimeout(()=>w.print(), 700);
+  setTimeout(() => w.print(), 700);
   return w;
 }
-
-function hojaEtiquetas(){
-  if(!DB.herramientas.length) return toast("Aún no hay herramientas dadas de alta","info");
-  const et = DB.herramientas.map(h =>
-    "<div class='e'><img src='"+qrDataURL(h.id,8)+"'>"+
-    "<div class='n'>"+esc(h.nombre.toUpperCase())+"</div>"+
-    "<div class='f'>"+esc(h.id)+(h.tipo==="lote"?" · "+h.total+" pzas":"")+"</div></div>").join("");
-  ventana("Etiquetas de herramienta",
-    "@page{size:letter;margin:10mm}body{font-family:system-ui,sans-serif;margin:0}"+
-    ".g{display:flex;flex-wrap:wrap;gap:3mm}"+
-    ".e{width:45mm;border:1px dashed #999;border-radius:2mm;padding:2mm;text-align:center;page-break-inside:avoid}"+
-    ".e img{width:33mm;height:33mm}"+
-    ".n{font-weight:700;font-size:9pt;line-height:1.15;margin-top:1mm;word-wrap:break-word}"+
-    ".f{font-family:monospace;font-size:7pt;color:#666;margin-top:1mm}",
-    "<div class='g'>"+et+"</div>");
+function hojaCredenciales(){
+  if(!DB.personas.length) return toast("No hay personas registradas", "info");
+  const t = DB.personas.map(p =>
+    "<div class='c'><img src='" + qrDataURL(codigoPersona(p),8) + "'><div class='n'>" + esc(p.nombre) +
+    "</div><div class='a'>" + esc(p.teams||"") + "</div><div class='f'>" + esc(p.id) + "</div></div>").join("");
+  ventana("Credenciales",
+    "@page{size:letter;margin:10mm}body{font-family:system-ui,sans-serif;margin:0}" +
+    ".g{display:flex;flex-wrap:wrap;gap:4mm}" +
+    ".c{width:58mm;border:1px dashed #999;border-radius:3mm;padding:3mm;text-align:center;page-break-inside:avoid}" +
+    ".c img{width:40mm;height:40mm}" +
+    ".n{font-weight:700;font-size:11pt;margin-top:1mm;line-height:1.2}" +
+    ".a{font-size:8pt;color:#555}.f{font-family:monospace;font-size:9pt;margin-top:1mm}",
+    "<div class='g'>" + t + "</div>");
 }
-
-function mostrarLigaRegistro(){
+function hojaEtiquetas(){
+  if(!DB.herramientas.length) return toast("Aún no hay herramientas dadas de alta", "info");
+  const et = DB.herramientas.map(h =>
+    "<div class='e'><img src='" + qrDataURL(h.id,8) + "'><div class='n'>" + esc(h.nombre.toUpperCase()) +
+    "</div><div class='f'>" + esc(h.id) + (h.tipo === "lote" ? " · " + h.total + " pzas" : "") + "</div></div>").join("");
+  ventana("Etiquetas de herramienta",
+    "@page{size:letter;margin:10mm}body{font-family:system-ui,sans-serif;margin:0}" +
+    ".g{display:flex;flex-wrap:wrap;gap:3mm}" +
+    ".e{width:45mm;border:1px dashed #999;border-radius:2mm;padding:2mm;text-align:center;page-break-inside:avoid}" +
+    ".e img{width:33mm;height:33mm}" +
+    ".n{font-weight:700;font-size:9pt;line-height:1.15;margin-top:1mm;word-wrap:break-word}" +
+    ".f{font-family:monospace;font-size:7pt;color:#666;margin-top:1mm}",
+    "<div class='g'>" + et + "</div>");
+}
+function ligaRegistro(){
   const liga = location.origin + location.pathname + "#registro";
-  const cont = $("#panelBody");
   const caja = document.createElement("div");
   caja.className = "card";
-  caja.innerHTML = "<h2>Liga de registro</h2>"+
-    "<p style='word-break:break-all;color:#e8edf2'>"+esc(liga)+"</p>"+
-    "<div style='background:#fff;padding:12px;border-radius:10px;text-align:center'>"+
-    "<img src='"+qrDataURL(liga,8)+"' style='width:100%;max-width:220px'></div>"+
-    "<p>Que escaneen este código con su celular. Solo verán el formulario de registro.</p>";
+  caja.innerHTML = "<h2>Liga de registro</h2>" +
+    "<p style='word-break:break-all;color:#e8edf2'>" + esc(liga) + "</p>" +
+    "<div style='background:#fff;padding:12px;border-radius:10px;text-align:center'>" +
+    "<img src='" + qrDataURL(liga,8) + "' style='width:100%;max-width:220px'></div>" +
+    "<p>Que la escaneen con su celular. Solo verán el formulario de registro.</p>";
+  const cont = $("#panelBody");
   cont.insertBefore(caja, cont.firstChild);
-  caja.scrollIntoView({behavior:"smooth", block:"center"});
+  caja.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-/* ============ EVENTOS ============ */
-$("#btnScan").onclick     = ()=> iniciarCamara("persona");
-$("#btnScanHerr").onclick = ()=> iniciarCamara("herramienta");
-$("#btnTerminarTurno").onclick = terminarTurno;
-$("#btnCerrarScan").onclick = ()=>{
-  veniaCamara=false; pararCamara();
-  if(paso === "herramienta" && activa){ ver("vInicio"); pintarInicio(); }
-  else terminarTurno();
+/* ======================= EVENTOS ======================= */
+$("#btnPrestar").onclick  = () => irPaso1("prestar");
+$("#btnDevolver").onclick = () => {
+  if(!abiertos().length) return toast("No hay nada prestado ahora mismo.", "info", 3000);
+  irPaso1("devolver");
 };
-$("#btnManual").onclick = ()=>{ veniaCamara=false; $("#mFolio").value=""; ver("vManual"); $("#mFolio").focus(); };
-$("#btnManualCancel").onclick = ()=> ver("vInicio");
-$("#btnManualOk").onclick = ()=>{
-  const v = $("#mFolio").value.trim().toUpperCase();
-  if(!v) return toast("Escribe un folio","err");
-  ver("vInicio"); procesar(v);
-};
-$("#mFolio").addEventListener("keydown", e=>{ if(e.key==="Enter") $("#btnManualOk").click(); });
+$("#btnCancelar1").onclick = inicio;
+$("#btnCancelar2").onclick = inicio;
+$("#btnListo").onclick = terminar;
+$("#btnFinOk").onclick = inicio;
 
-$("#btnAlta").onclick = ()=>{
-  $("#pNombre").value=""; $("#pTeams").value="";
-  ver("vPersona"); $("#pNombre").focus();
-};
-$("#btnCancelPersona").onclick = ()=> ver("vInicio");
-$("#btnGuardarPersona").onclick = ()=>{
-  const nombre = $("#pNombre").value.trim();
-  if(nombre.length < 3) return toast("Escribe el nombre completo","err");
-  const p = { id:nuevoIdPersona(), nombre, area:"",
-    teams:$("#pTeams").value.trim(), creado:Date.now() };
-  DB.personas.push(p); guardar();
-  if(!MODO_REGISTRO) setActiva(p);
-  mostrarQRPersona(p);
-  toast(MODO_REGISTRO ? "Listo, "+p.nombre.split(" ")[0]+". Guarda tu credencial." : "Registrado","ok", 3600);
-};
-$("#btnQRListo").onclick = ()=>{
-  if(herrPendiente && activa){ return entregarA(activa); }
-  if(MODO_REGISTRO){
-    $("#pNombre").value=""; $("#pTeams").value="";
-    ver("vPersona"); return;
-  }
-  ver("vInicio");
-};
-$("#btnDescargarQR").onclick = async ()=>{
-  if(!personaQR) return;
-  const nombre = "credencial_"+personaQR.id+"_"+personaQR.nombre.replace(/\s+/g,"_")+".png";
-  const url = qrDataURL(codigoPersona(personaQR), 14);
-  const bin = atob(url.split(",")[1]);
-  const arr = new Uint8Array(bin.length);
-  for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
-  await bajar(nombre, arr, "image/png");
-  toast("Imagen descargada","ok");
-};
-$("#btnImprimirQR").onclick = ()=>{
-  if(!personaQR) return;
-  const p = personaQR;
-  const w = window.open("","_blank");
-  if(!w) return toast("El navegador bloqueó la ventana. Permite ventanas emergentes.","err",4200);
-  w.document.write("<!doctype html><html><head><meta charset='utf-8'><title>"+esc(p.id)+
-    "</title><style>@page{margin:14mm}body{font-family:system-ui,sans-serif;text-align:center}"+
-    "img{width:70mm;height:70mm}h2{margin:4mm 0 1mm;font-size:15pt}"+
-    "p{margin:0;color:#444;font-size:10pt}.f{font-family:monospace;margin-top:2mm;font-size:12pt}"+
-    "</style></head><body><img src='"+qrDataURL(codigoPersona(p),10)+"'><h2>"+esc(p.nombre)+
-    "</h2><p>"+esc(p.teams||"")+"</p><div class='f'>"+esc(p.id)+"</div></body></html>");
-  w.document.close(); setTimeout(()=>w.print(),600);
-};
-
-$("#hTipo").onchange = e => $("#hCantWrap").classList.toggle("hide", e.target.value!=="lote");
-$("#btnCancelHerr").onclick = ()=>{ pendiente=null; if(veniaCamara) iniciarCamara(); else ver("vInicio"); };
-$("#btnGuardarHerr").onclick = ()=>{
-  if(!pendiente) return ver("vInicio");
-  const nombre = $("#hNombre").value.trim();
-  if(nombre.length < 2) return toast("Escribe qué herramienta es","err");
-  const tipo = $("#hTipo").value;
-  let total = 1;
-  if(tipo==="lote"){
-    total = parseInt($("#hCant").value,10);
-    if(!(total>0)) return toast("Cantidad inválida","err");
-  }
-  DB.herramientas.push({ id:pendiente.folio, nombre, tipo, total, creado:Date.now() });
-  guardar();
-  const nueva = herrPorId(pendiente.folio); pendiente = null;
-  toast("Añadida: "+nombre,"ok");
-  if(activa){ ver("vInicio"); procesarHerramienta(nueva.id); }
-  else { pedirPersona(nueva, true); }
-};
-
-$("#quienBuscar").addEventListener("input", e => pintarListaPersonas(e.target.value));
-$("#quienLista").addEventListener("click", e => {
+$("#buscarPersona").addEventListener("input", e => pintarListaPersonas(e.target.value));
+$("#listaPersonas").addEventListener("click", e => {
   const it = e.target.closest("[data-per]");
   if(!it) return;
   const p = perPorId(it.dataset.per);
-  if(p) entregarA(p);
+  if(p) elegirPersona(p);
 });
-$("#btnQuienScan").onclick = ()=>{ iniciarCamara("persona"); };
-$("#btnQuienNueva").onclick = ()=>{
-  $("#pNombre").value=""; $("#pTeams").value="";
-  ver("vPersona"); $("#pNombre").focus();
-};
-$("#btnQuienCancel").onclick = ()=>{ herrPendiente=null; ver("vInicio"); };
 
-$("#btnCantCancel").onclick = ()=>{ cantCtx=null; ver("vInicio"); };
-$("#btnCantOk").onclick = ()=>{
-  if(!cantCtx) return ver("vInicio");
+$("#btnFolioManual").onclick = () => { pararCamara(); $("#mFolio").value = ""; ver("vManual"); $("#mFolio").focus(); };
+$("#btnManualCancel").onclick = () => { if(persona) irPaso2(); else inicio(); };
+$("#btnManualOk").onclick = () => {
+  const v = $("#mFolio").value.trim().toUpperCase();
+  if(!v) return toast("Escribe un folio", "err");
+  if(persona) irPaso2();
+  procesar(v);
+};
+$("#mFolio").addEventListener("keydown", e => { if(e.key === "Enter") $("#btnManualOk").click(); });
+
+$("#hTipo").onchange = e => $("#hCantWrap").classList.toggle("hide", e.target.value !== "lote");
+$("#btnCancelHerr").onclick = () => { folioPendiente = null; irPaso2(); };
+$("#btnGuardarHerr").onclick = () => {
+  if(!folioPendiente) return inicio();
+  const nombre = $("#hNombre").value.trim();
+  if(nombre.length < 2) return toast("Escribe qué herramienta es", "err");
+  const tipo = $("#hTipo").value;
+  let total = 1;
+  if(tipo === "lote"){
+    total = parseInt($("#hCant").value,10);
+    if(!(total > 0)) return toast("Cantidad inválida", "err");
+  }
+  DB.herramientas.push({ id: folioPendiente, nombre, tipo, total, creado: Date.now() });
+  guardar();
+  const folio = folioPendiente; folioPendiente = null;
+  toast("Añadida al catálogo: " + nombre, "ok", 3000);
+  irPaso2();
+  herramienta(folio);
+};
+
+$("#btnCantCancel").onclick = () => { cantCtx = null; irPaso2(); };
+$("#btnCantOk").onclick = () => {
+  if(!cantCtx) return inicio();
   const n = parseInt($("#cValor").value,10);
-  if(!(n>0)) return toast("Cantidad inválida","err");
-  if(cantCtx.modo==="prestar"){
-    const d = disp(cantCtx.herr);
-    if(n>d) return toast("Solo hay "+d+" disponibles","err");
-    DB.prestamos.push({ id:"L"+Date.now()+Math.random().toString(36).slice(2,6),
-      perId:activa.id, herrId:cantCtx.herr.id, cant:n, salida:Date.now(), regreso:null });
-    guardar(); toast("Salieron "+n+" · "+cantCtx.herr.nombre,"ok");
+  if(!(n > 0)) return toast("Cantidad inválida", "err");
+  const h = cantCtx.herr;
+  if(cantCtx.accion === "prestar"){
+    const d = disp(h);
+    if(n > d) return toast("Solo hay " + d + " disponibles", "err");
+    DB.prestamos.push({ id: nuevoIdPrestamo(), perId: persona.id, herrId: h.id,
+      cant: n, salida: Date.now(), regreso: null });
+    guardar(); hechas.push(h.nombre + " ×" + n);
+    toast("Salieron " + n + " · " + h.nombre, "ok");
   } else {
     const pr = cantCtx.prestamo;
-    if(n>pr.cant) return toast("Se llevó "+pr.cant,"err");
-    if(n===pr.cant){ pr.regreso = Date.now(); }
+    if(n > pr.cant) return toast("Se llevó " + pr.cant, "err");
+    if(n === pr.cant){ pr.regreso = Date.now(); }
     else {
       pr.cant -= n;
-      DB.prestamos.push({ id:"L"+Date.now()+Math.random().toString(36).slice(2,6),
-        perId:pr.perId, herrId:pr.herrId, cant:n, salida:pr.salida, regreso:Date.now() });
+      DB.prestamos.push({ id: nuevoIdPrestamo(), perId: pr.perId, herrId: pr.herrId,
+        cant: n, salida: pr.salida, regreso: Date.now() });
     }
-    guardar(); toast("Devueltas "+n,"ok");
+    guardar(); hechas.push(h.nombre + " ×" + n);
+    toast("Devueltas " + n, "ok");
   }
   cantCtx = null;
-  pintarInicio();
-  if(veniaCamara) iniciarCamara(); else ver("vInicio");
+  irPaso2();
 };
 
-$("#btnPanel").onclick = ()=>{
-  veniaCamara=false;
-  $("#pinVal").value=""; $("#pinSub").textContent="Para ver reportes y ajustes.";
-  pararCamara(); ver("vPin"); $("#pinVal").focus();
+$("#btnAlta").onclick = abrirAlta;
+$("#btnAltaDesdePaso1").onclick = abrirAlta;
+function abrirAlta(){
+  pararCamara();
+  $("#pNombre").value = ""; $("#pTeams").value = "";
+  $("#hdrTit").textContent = "Registrar persona";
+  $("#hdrSub").textContent = "";
+  ver("vPersona"); $("#pNombre").focus();
+}
+$("#btnCancelPersona").onclick = () => { if(modo) irPaso1(modo); else inicio(); };
+$("#btnGuardarPersona").onclick = () => {
+  const nombre = $("#pNombre").value.trim();
+  if(nombre.length < 3) return toast("Escribe el nombre completo", "err");
+  const p = { id: nuevoIdPersona(), nombre, teams: $("#pTeams").value.trim(), creado: Date.now() };
+  DB.personas.push(p); guardar();
+  if(!MODO_REGISTRO && modo) persona = p;
+  mostrarQRPersona(p);
 };
-$("#btnPinCancel").onclick = ()=> ver("vInicio");
-$("#btnPinOk").onclick = ()=>{
-  if($("#pinVal").value !== DB.config.pin) return toast("PIN incorrecto","err");
-  abrirPanel();
+$("#btnQRListo").onclick = () => {
+  if(MODO_REGISTRO){
+    $("#pNombre").value = ""; $("#pTeams").value = "";
+    $("#btnQRListo").textContent = "Continuar";
+    ver("vPersona"); return;
+  }
+  if(modo && persona) irPaso2(); else inicio();
 };
-$("#pinVal").addEventListener("keydown", e=>{ if(e.key==="Enter") $("#btnPinOk").click(); });
-$("#btnSalirPanel").onclick = terminarTurno;
-document.querySelectorAll(".tabs button").forEach(b=>
-  b.onclick = ()=>{ tabActual = b.dataset.tab; pintarPanel(); });
-$("#panelBody").addEventListener("click", e=>{
+$("#btnDescargarQR").onclick = async () => {
+  if(!personaQR) return;
+  const url = qrDataURL(codigoPersona(personaQR), 14);
+  const bin = atob(url.split(",")[1]);
+  const arr = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
+  await bajar("credencial_" + personaQR.id + ".png", arr, "image/png");
+  toast("Imagen descargada", "ok");
+};
+$("#btnImprimirQR").onclick = () => {
+  if(!personaQR) return;
+  const p = personaQR;
+  ventana(esc(p.id),
+    "@page{margin:14mm}body{font-family:system-ui,sans-serif;text-align:center}" +
+    "img{width:70mm;height:70mm}h2{margin:4mm 0 1mm;font-size:15pt}" +
+    "p{margin:0;color:#444;font-size:10pt}.f{font-family:monospace;margin-top:2mm;font-size:12pt}",
+    "<img src='" + qrDataURL(codigoPersona(p),10) + "'><h2>" + esc(p.nombre) + "</h2>" +
+    "<p>" + esc(p.teams||"") + "</p><div class='f'>" + esc(p.id) + "</div>");
+};
+
+$("#btnPanel").onclick = () => {
+  pararCamara(); $("#pinVal").value = "";
+  $("#hdrTit").textContent = "Panel"; $("#hdrSub").textContent = "";
+  ver("vPin"); $("#pinVal").focus();
+};
+$("#btnPinCancel").onclick = inicio;
+$("#btnPinOk").onclick = () => {
+  if($("#pinVal").value !== DB.config.pin) return toast("PIN incorrecto", "err");
+  $("#hdrTit").textContent = "Panel"; $("#hdrSub").textContent = "Reportes y ajustes";
+  ver("vPanel"); pintarPanel();
+};
+$("#pinVal").addEventListener("keydown", e => { if(e.key === "Enter") $("#btnPinOk").click(); });
+$("#btnSalirPanel").onclick = inicio;
+document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => { tab = b.dataset.tab; pintarPanel(); });
+$("#panelBody").addEventListener("click", e => {
   const a = e.target.closest("[data-qr]");
   if(a){ e.preventDefault(); const p = perPorId(a.dataset.qr); if(p) mostrarQRPersona(p); }
 });
 
-document.addEventListener("visibilitychange", ()=>{ if(document.hidden) pararCamara(); });
+document.addEventListener("visibilitychange", () => { if(document.hidden) pararCamara(); });
 
-/* ============ ARRANQUE ============ */
+/* ======================= ARRANQUE ======================= */
 const MODO_REGISTRO = location.hash.toLowerCase().indexOf("registro") >= 0;
 if(MODO_REGISTRO){
-  document.querySelectorAll(".soloKiosco").forEach(e=>e.classList.add("hide"));
-  document.querySelectorAll(".modoReg").forEach(e=>e.classList.remove("hide"));
+  document.querySelectorAll(".soloKiosco").forEach(e => e.classList.add("hide"));
+  document.querySelectorAll(".modoReg").forEach(e => e.classList.remove("hide"));
   $("#btnAlta").className = "big";
   $("#btnAlta").textContent = "REGISTRARME";
-  $("#hdrsub").textContent = "Registro de personal";
   $("#btnQRListo").textContent = "Registrar a otra persona";
   $("#btnCancelPersona").classList.add("hide");
 } else if(!hayCamara){
   $("#avisoCam").classList.remove("hide");
 }
 if(!storageOK) $("#avisoStore").classList.remove("hide");
-pintarInicio();
-ver("vInicio");
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("sw.js").catch(()=>{});
-}
+inicio();
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 </body>
 </html>
