@@ -117,7 +117,9 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
     <div class="warnbar hide" id="avisoStore">Este navegador no está guardando los datos. Todo lo que registres se perderá al recargar. Abre la app desde su liga normal, no desde un archivo ni en modo incógnito.</div>
     <div class="card modoReg hide"><h2>Registro de personal</h2><p>Llena tus datos una sola vez. Se te genera tu credencial con código QR: guárdala en tu celular o imprímela y muéstrala en el almacén cada vez que saques herramienta.</p></div>
     <div class="card" id="activeCard" style="display:none"></div>
-    <button class="big soloKiosco" id="btnScan">ESCANEAR</button>
+    <button class="big soloKiosco" id="btnScan">PASO 1 · ESCANEAR PERSONA</button>
+    <button class="big soloKiosco hide" id="btnScanHerr" style="margin-top:9px">PASO 2 · ESCANEAR HERRAMIENTAS</button>
+    <button class="sec soloKiosco hide" id="btnTerminarTurno">Terminar turno</button>
     <button class="sec soloKiosco" id="btnManual">Teclear folio</button>
     <button class="sec" id="btnAlta">Registrarme (nueva persona)</button>
     <div id="resumen" class="soloKiosco" style="margin-top:18px"></div>
@@ -131,6 +133,7 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
       <div id="scanmsg">Acerca el código</div>
     </div>
     <div class="card" id="scanInfo"></div>
+    <div id="scanLista"></div>
     <button class="big grey" id="btnCerrarScan">Terminar</button>
   </section>
 
@@ -142,8 +145,6 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
     </div>
     <label>Nombre completo</label>
     <input id="pNombre" autocomplete="off" placeholder="Ej. Martín Flores">
-    <label>Área</label>
-    <input id="pArea" autocomplete="off" placeholder="Ej. Mantenimiento">
     <label>Usuario de Teams o correo</label>
     <input id="pTeams" autocomplete="off" inputmode="email" placeholder="nombre@empresa.com">
     <div style="height:16px"></div>
@@ -304,7 +305,7 @@ const limpio = t => String(t||"").replace(/\|/g,"/").replace(/\n/g," ").trim();
 // Los acentos se escapan: la librería de QR no maneja UTF-8 y el código saldría ilegible.
 const aQR = t => encodeURIComponent(limpio(t));
 const deQR = t => { try{ return decodeURIComponent(String(t||"")); }catch(e){ return String(t||""); } };
-const codigoPersona = p => ["PER1", p.id, aQR(p.nombre), aQR(p.area), aQR(p.teams)].join("|");
+const codigoPersona = p => ["PER1", p.id, aQR(p.nombre), "", aQR(p.teams)].join("|");
 
 /* ============ UI BÁSICA ============ */
 const $ = s => document.querySelector(s);
@@ -342,24 +343,45 @@ const SESION_MS = 90000;
 function setActiva(p){
   activa = p;
   clearTimeout(timerSesion);
-  if(p) timerSesion = setTimeout(()=>{ setActiva(null); pintarInicio(); pintarScanInfo(); }, SESION_MS);
+  if(!p) leidosTurno = [];
   pintarInicio(); pintarScanInfo();
+}
+
+// Termina el paso 1: cierra la cámara y deja listo el paso 2.
+function abrirPaso2(){
+  paso = "herramienta";
+  pararCamara();
+  ver("vInicio");
+  pintarInicio();
+}
+
+function terminarTurno(){
+  setActiva(null);
+  paso = "persona";
+  leidosTurno = [];
+  pararCamara();
+  ver("vInicio");
 }
 
 function pintarInicio(){
   const c = $("#activeCard");
   if(typeof MODO_REGISTRO !== "undefined" && MODO_REGISTRO){ c.style.display="none"; return; }
+  const bScan = $("#btnScan"), bHerr = $("#btnScanHerr"), bFin = $("#btnTerminarTurno");
   if(!activa){
     c.style.display="none";
-    $("#hdrsub").textContent = "Listo para escanear";
+    $("#hdrsub").textContent = "Paso 1 · identificar persona";
+    if(bScan){ bScan.classList.remove("hide"); bHerr.classList.add("hide"); bFin.classList.add("hide"); }
   } else {
+    if(bScan){ bScan.classList.add("hide"); bHerr.classList.remove("hide"); bFin.classList.remove("hide"); }
     const l = abiertosDe(activa.id);
     c.style.display="block";
-    c.innerHTML = "<h2>"+esc(activa.nombre)+"</h2><p>"+esc(activa.area||"")+
-      " · <span class='mono'>"+esc(activa.id)+"</span></p>" +
+    c.innerHTML = "<h2>"+esc(activa.nombre)+"</h2><p>"+esc(activa.teams||"")+
+      (activa.teams?" · ":"")+"<span class='mono'>"+esc(activa.id)+"</span></p>" +
       (l.length ? "<p><b style='color:#f08a86'>Trae "+l.length+" registro"+(l.length>1?"s":"")+" sin devolver</b></p>"
-                : "<p style='color:#5fd39b'>Sin herramienta pendiente</p>");
-    $("#hdrsub").textContent = "Turno de "+activa.nombre.split(" ")[0];
+                : "<p style='color:#5fd39b'>Sin herramienta pendiente</p>")+
+      (leidosTurno.length ? "<p style='color:#5fd39b'>En este turno: "+
+        leidosTurno.map(x=>esc(x)).join(", ")+"</p>" : "");
+    $("#hdrsub").textContent = "Paso 2 · herramientas de "+activa.nombre.split(" ")[0];
   }
   pintarResumen();
 }
@@ -387,19 +409,38 @@ function pintarScanInfo(){
           return esc(h?h.nombre:p.herrId)+(p.cant>1?" ×"+p.cant:"");
         }).join(", ")+"</p>" : "");
   }
+  const lista = $("#scanLista");
+  if(lista){
+    lista.innerHTML = leidosTurno.length
+      ? "<div class='card'><h2>Registradas en este turno</h2>"+
+        leidosTurno.map(x=>"<div class='item'><div class='t'>"+esc(x)+"</div></div>").join("")+"</div>"
+      : "";
+  }
 }
 
 /* ============ LÓGICA DE ESCANEO ============ */
 let pendiente = null;  // {folio} herramienta por dar de alta
 let cantCtx = null;    // contexto de la pantalla de cantidad
 
-function procesar(codigo){
+function procesar(codigo, desdeCamara){
   const crudo = String(codigo||"").trim();
   if(!crudo) return;
-  if(crudo.startsWith("PER1|")) return procesarPersonaQR(crudo);
   const f = crudo.toUpperCase();
+  const esPersona = crudo.startsWith("PER1|") || f.startsWith("PER-");
+  const esHerr    = f.startsWith("HER-");
+
+  // Con la cámara abierta solo se acepta lo que toca en este paso,
+  // para que un código que pase por delante no registre nada por error.
+  if(desdeCamara){
+    if(paso === "persona" && esHerr)
+      return toast("Paso 1: escanea primero la credencial de la persona.","err",3000);
+    if(paso === "herramienta" && esPersona)
+      return toast("Paso 2: escanea las herramientas, no credenciales.","err",3000);
+  }
+
+  if(crudo.startsWith("PER1|")) return procesarPersonaQR(crudo);
   if(f.startsWith("PER-")) return procesarPersona(f);
-  if(f.startsWith("HER-")) return procesarHerramienta(f);
+  if(esHerr) return procesarHerramienta(f);
   toast("Código no reconocido: "+f, "err");
 }
 
@@ -410,7 +451,7 @@ function procesarPersonaQR(crudo){
   if(!id) return toast("Credencial ilegible","err");
   let p = perPorId(id);
   if(!p){
-    p = { id, nombre:(deQR(t[2])||"Sin nombre").trim(), area:deQR(t[3]).trim(),
+    p = { id, nombre:(deQR(t[2])||"Sin nombre").trim(), area:"",
           teams:deQR(t[4]).trim(), creado:Date.now() };
     DB.personas.push(p); guardar();
     toast("Alta automática: "+p.nombre, "ok", 3200);
@@ -419,6 +460,7 @@ function procesarPersonaQR(crudo){
   }
   if(herrPendiente){ return entregarA(p); }
   setActiva(p);
+  abrirPaso2();
 }
 
 function procesarPersona(folio){
@@ -429,11 +471,16 @@ function procesarPersona(folio){
   }
   if(herrPendiente){ return entregarA(p); }
   setActiva(p);
-  toast("Hola "+p.nombre.split(" ")[0], "ok");
+  toast("Hola "+p.nombre.split(" ")[0]+". Ahora las herramientas.", "ok", 3000);
+  abrirPaso2();
 }
 
 function procesarHerramienta(folio){
   const h = herrPorId(folio);
+  if(h && leidosTurno.indexOf(h.nombre) >= 0){
+    toast(h.nombre+" ya quedó registrada en este turno.", "info", 2600);
+    return;
+  }
   if(!h){
     pendiente = { folio };
     $("#hFolio").textContent = folio;
@@ -484,6 +531,7 @@ function procesarHerramienta(folio){
   DB.prestamos.push({ id:"L"+Date.now()+Math.random().toString(36).slice(2,6),
     perId:activa.id, herrId:h.id, cant:1, salida:Date.now(), regreso:null });
   guardar();
+  leidosTurno.push(h.nombre);
   toast("Salió: "+h.nombre, "ok");
   pintarInicio(); pintarScanInfo();
 }
@@ -512,7 +560,7 @@ function pedirPersona(h, reciénDadaDeAlta){
 function pintarListaPersonas(filtro){
   const f = filtro.trim().toLowerCase();
   let ps = DB.personas.slice();
-  if(f) ps = ps.filter(p => (p.nombre+" "+(p.area||"")).toLowerCase().includes(f));
+  if(f) ps = ps.filter(p => (p.nombre+" "+(p.teams||"")).toLowerCase().includes(f));
   ps = ps.slice(0, 12);
   const cont = $("#quienLista");
   if(!DB.personas.length){
@@ -523,7 +571,7 @@ function pintarListaPersonas(filtro){
   cont.innerHTML = "<div class='card' style='margin-top:10px'>"+ps.map(p=>
     "<div class='item' data-per='"+esc(p.id)+"' style='cursor:pointer'>"+
     "<div class='t'>"+esc(p.nombre)+"</div>"+
-    "<div class='s'>"+esc(p.area||"sin área")+"</div></div>").join("")+"</div>";
+    "<div class='s'>"+esc(p.teams||"")+"</div></div>").join("")+"</div>";
 }
 
 function entregarA(p){
@@ -535,12 +583,15 @@ function entregarA(p){
 
 /* ============ CÁMARA ============ */
 let stream=null, rafId=null, lastCode="", lastTime=0, detector=null, veniaCamara=false;
+let paso = "persona";              // "persona" | "herramienta"
+let leidosTurno = [];              // herramientas ya registradas en este turno
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d", {willReadFrequently:true});
 
 const hayCamara = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
                   && (window.isSecureContext !== false);
-async function iniciarCamara(){
+async function iniciarCamara(modo){
+  if(modo) paso = modo;
   if(!hayCamara){
     toast("Esta vista no tiene acceso a la cámara. Usa 'Teclear folio'.","err",4600);
     veniaCamara = false;
@@ -562,7 +613,7 @@ async function iniciarCamara(){
   }
   const v = $("#video");
   v.srcObject = stream; await v.play().catch(()=>{});
-  $("#scanmsg").textContent = "Acerca el código";
+  $("#scanmsg").textContent = paso==="persona" ? "Acerca la credencial" : "Acerca la etiqueta de la herramienta";
   if("BarcodeDetector" in window){
     try{ detector = new BarcodeDetector({formats:["qr_code"]}); }catch(e){ detector=null; }
   }
@@ -597,7 +648,7 @@ async function bucle(){
       if(code !== lastCode || ahora-lastTime > 2200){
         lastCode = code; lastTime = ahora;
         $("#scanmsg").textContent = code;
-        procesar(code);
+        procesar(code, true);
       }
     }
   }
@@ -627,7 +678,7 @@ let personaQR = null;
 function mostrarQRPersona(p){
   personaQR = p;
   $("#qrNombre").textContent = p.nombre;
-  $("#qrDatos").innerHTML = esc(p.area||"") + " · <span class='mono'>"+esc(p.id)+"</span>" +
+  $("#qrDatos").innerHTML = "<span class='mono'>"+esc(p.id)+"</span>" +
     (p.teams? "<br>"+esc(p.teams) : "");
   dibujarQR($("#qrbox"), codigoPersona(p));
   ver("vQR");
@@ -655,7 +706,7 @@ function tabFuera(){
       "<div class='t'>"+esc(h?h.nombre:p.herrId)+(p.cant>1?" ×"+p.cant:"")+
       (t?" <span class='pill late'>RETRASO</span>":"")+"</div>"+
       "<div class='s'>"+esc(per?per.nombre:p.perId)+
-      (per&&per.area?" · "+esc(per.area):"")+"</div>"+
+      "</div>"+
       "<div class='s'>Salió "+fmt(p.salida)+" · hace "+transcurrido(p.salida)+
       " · <span class='mono'>"+esc(p.herrId)+"</span></div>"+
       (per&&per.teams? "<div class='s'>"+esc(per.teams)+"</div>":"")+
@@ -680,7 +731,7 @@ function tabPer(){
     const n = abiertosDe(p.id).length;
     return "<div class='item'><div class='t'>"+esc(p.nombre)+
       (n?" <span class='pill out'>"+n+" fuera</span>":"")+"</div>"+
-      "<div class='s'>"+esc(p.area||"sin área")+" · <span class='mono'>"+esc(p.id)+"</span></div>"+
+      "<div class='s'><span class='mono'>"+esc(p.id)+"</span></div>"+
       (p.teams?"<div class='s'>"+esc(p.teams)+"</div>":"")+
       "<div class='s'><a href='#' data-qr='"+esc(p.id)+"' style='color:#5fd39b'>Ver su QR</a></div>"+
       "</div>";
@@ -762,12 +813,12 @@ async function bajar(nombre, contenido, tipo){
 }
 const cell = v => '"' + String(v==null?"":v).replace(/"/g,'""') + '"';
 function exportarCSV(){
-  const filas = [["folio_herramienta","herramienta","tipo","cantidad","folio_persona","persona","area","teams","salida","regreso","estado","horas_fuera"]];
+  const filas = [["folio_herramienta","herramienta","tipo","cantidad","folio_persona","persona","teams","salida","regreso","estado","horas_fuera"]];
   DB.prestamos.slice().sort((a,b)=>b.salida-a.salida).forEach(p=>{
     const h = herrPorId(p.herrId), per = perPorId(p.perId);
     const fin = p.regreso || Date.now();
     filas.push([p.herrId, h?h.nombre:"", h?h.tipo:"", p.cant||1, p.perId, per?per.nombre:"",
-      per?per.area:"", per?per.teams:"", fmt(p.salida), p.regreso?fmt(p.regreso):"",
+      per?per.teams:"", fmt(p.salida), p.regreso?fmt(p.regreso):"",
       p.regreso?"devuelto":(esTarde(p)?"FUERA CON RETRASO":"fuera"),
       ((fin-p.salida)/3600e3).toFixed(1)]);
   });
@@ -803,7 +854,7 @@ function hojaCredenciales(){
   if(!DB.personas.length) return toast("No hay personas registradas","info");
   const tarjetas = DB.personas.map(p =>
     "<div class='c'><img src='"+qrDataURL(codigoPersona(p),8)+"'><div class='n'>"+esc(p.nombre)+
-    "</div><div class='a'>"+esc(p.area||"")+"</div><div class='f'>"+esc(p.id)+"</div></div>").join("");
+    "</div><div class='a'>"+esc(p.teams||"")+"</div><div class='f'>"+esc(p.id)+"</div></div>").join("");
   ventana("Credenciales",
     "@page{size:letter;margin:10mm}body{font-family:system-ui,sans-serif;margin:0}"+
     ".g{display:flex;flex-wrap:wrap;gap:4mm}"+
@@ -855,8 +906,14 @@ function mostrarLigaRegistro(){
 }
 
 /* ============ EVENTOS ============ */
-$("#btnScan").onclick   = iniciarCamara;
-$("#btnCerrarScan").onclick = ()=>{ veniaCamara=false; pararCamara(); setActiva(null); ver("vInicio"); };
+$("#btnScan").onclick     = ()=> iniciarCamara("persona");
+$("#btnScanHerr").onclick = ()=> iniciarCamara("herramienta");
+$("#btnTerminarTurno").onclick = terminarTurno;
+$("#btnCerrarScan").onclick = ()=>{
+  veniaCamara=false; pararCamara();
+  if(paso === "herramienta" && activa){ ver("vInicio"); pintarInicio(); }
+  else terminarTurno();
+};
 $("#btnManual").onclick = ()=>{ veniaCamara=false; $("#mFolio").value=""; ver("vManual"); $("#mFolio").focus(); };
 $("#btnManualCancel").onclick = ()=> ver("vInicio");
 $("#btnManualOk").onclick = ()=>{
@@ -867,14 +924,14 @@ $("#btnManualOk").onclick = ()=>{
 $("#mFolio").addEventListener("keydown", e=>{ if(e.key==="Enter") $("#btnManualOk").click(); });
 
 $("#btnAlta").onclick = ()=>{
-  $("#pNombre").value=""; $("#pArea").value=""; $("#pTeams").value="";
+  $("#pNombre").value=""; $("#pTeams").value="";
   ver("vPersona"); $("#pNombre").focus();
 };
 $("#btnCancelPersona").onclick = ()=> ver("vInicio");
 $("#btnGuardarPersona").onclick = ()=>{
   const nombre = $("#pNombre").value.trim();
   if(nombre.length < 3) return toast("Escribe el nombre completo","err");
-  const p = { id:nuevoIdPersona(), nombre, area:$("#pArea").value.trim(),
+  const p = { id:nuevoIdPersona(), nombre, area:"",
     teams:$("#pTeams").value.trim(), creado:Date.now() };
   DB.personas.push(p); guardar();
   if(!MODO_REGISTRO) setActiva(p);
@@ -884,7 +941,7 @@ $("#btnGuardarPersona").onclick = ()=>{
 $("#btnQRListo").onclick = ()=>{
   if(herrPendiente && activa){ return entregarA(activa); }
   if(MODO_REGISTRO){
-    $("#pNombre").value=""; $("#pArea").value=""; $("#pTeams").value="";
+    $("#pNombre").value=""; $("#pTeams").value="";
     ver("vPersona"); return;
   }
   ver("vInicio");
@@ -909,7 +966,7 @@ $("#btnImprimirQR").onclick = ()=>{
     "img{width:70mm;height:70mm}h2{margin:4mm 0 1mm;font-size:15pt}"+
     "p{margin:0;color:#444;font-size:10pt}.f{font-family:monospace;margin-top:2mm;font-size:12pt}"+
     "</style></head><body><img src='"+qrDataURL(codigoPersona(p),10)+"'><h2>"+esc(p.nombre)+
-    "</h2><p>"+esc(p.area||"")+"</p><div class='f'>"+esc(p.id)+"</div></body></html>");
+    "</h2><p>"+esc(p.teams||"")+"</p><div class='f'>"+esc(p.id)+"</div></body></html>");
   w.document.close(); setTimeout(()=>w.print(),600);
 };
 
@@ -940,9 +997,9 @@ $("#quienLista").addEventListener("click", e => {
   const p = perPorId(it.dataset.per);
   if(p) entregarA(p);
 });
-$("#btnQuienScan").onclick = ()=>{ iniciarCamara(); };
+$("#btnQuienScan").onclick = ()=>{ iniciarCamara("persona"); };
 $("#btnQuienNueva").onclick = ()=>{
-  $("#pNombre").value=""; $("#pArea").value=""; $("#pTeams").value="";
+  $("#pNombre").value=""; $("#pTeams").value="";
   ver("vPersona"); $("#pNombre").focus();
 };
 $("#btnQuienCancel").onclick = ()=>{ herrPendiente=null; ver("vInicio"); };
@@ -985,7 +1042,7 @@ $("#btnPinOk").onclick = ()=>{
   abrirPanel();
 };
 $("#pinVal").addEventListener("keydown", e=>{ if(e.key==="Enter") $("#btnPinOk").click(); });
-$("#btnSalirPanel").onclick = ()=>{ setActiva(null); ver("vInicio"); };
+$("#btnSalirPanel").onclick = terminarTurno;
 document.querySelectorAll(".tabs button").forEach(b=>
   b.onclick = ()=>{ tabActual = b.dataset.tab; pintarPanel(); });
 $("#panelBody").addEventListener("click", e=>{
