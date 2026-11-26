@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1216">
+<link rel="manifest" href="manifest.json">
+<title>Almacén de Herramienta</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:#0f1216;color:#e8edf2;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  display:flex;flex-direction:column;overscroll-behavior:none;
+}
+:root{
+  --acc:#2f9e6e; --acc2:#1f7a54; --dang:#d9433f; --warn:#e0a03a;
+  --card:#181d24; --line:#272e38; --mut:#8b97a6;
+}
+header{
+  padding:10px 14px;background:#141920;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:10px;flex:0 0 auto;
+}
+header h1{font-size:15px;margin:0;font-weight:600;letter-spacing:.3px;flex:1}
+header .sub{font-size:11px;color:var(--mut);font-weight:400}
+.iconbtn{
+  background:#222935;border:1px solid var(--line);color:#cfd8e3;
+  border-radius:9px;padding:8px 11px;font-size:13px;font-weight:600;
+}
+main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;padding-bottom:28px}
+.hide{display:none!important}
+
+button{font-family:inherit}
+.big{
+  width:100%;padding:20px;font-size:19px;font-weight:700;border:0;border-radius:14px;
+  background:var(--acc);color:#fff;letter-spacing:.3px;
+}
+.big:active{background:var(--acc2)}
+.big.grey{background:#2b3340;color:#dbe3ec}
+.big.red{background:var(--dang)}
+.sec{
+  width:100%;padding:13px;font-size:15px;font-weight:600;border:1px solid var(--line);
+  border-radius:11px;background:#1d242d;color:#dbe3ec;margin-top:9px;
+}
+.row{display:flex;gap:9px}
+.row>*{flex:1}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px;margin-bottom:11px}
+.card h2{margin:0 0 4px;font-size:16px}
+.card p{margin:3px 0;font-size:13px;color:var(--mut);line-height:1.45}
+.pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.3px}
+.pill.ok{background:#17382a;color:#5fd39b}
+.pill.out{background:#3a2420;color:#f08a86}
+.pill.late{background:var(--dang);color:#fff}
+
+label{display:block;font-size:12px;color:var(--mut);margin:12px 0 5px;font-weight:600;letter-spacing:.3px}
+input,select{
+  width:100%;padding:13px;font-size:16px;border-radius:10px;
+  border:1px solid var(--line);background:#11161c;color:#e8edf2;
+}
+input:focus,select:focus{outline:2px solid var(--acc);border-color:transparent}
+
+#scanwrap{position:relative;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:1/1;margin-bottom:12px}
+#video{width:100%;height:100%;object-fit:cover;display:block}
+#reticle{
+  position:absolute;inset:16%;border:3px solid rgba(255,255,255,.85);border-radius:16px;
+  box-shadow:0 0 0 2000px rgba(0,0,0,.35);
+}
+#scanmsg{position:absolute;left:0;right:0;bottom:0;padding:9px;background:rgba(0,0,0,.72);
+  font-size:13px;text-align:center;font-weight:600}
+
+#toast{
+  position:fixed;left:12px;right:12px;bottom:14px;padding:15px;border-radius:13px;
+  font-size:15px;font-weight:700;text-align:center;z-index:50;line-height:1.35;
+  box-shadow:0 8px 28px rgba(0,0,0,.5);
+}
+#toast.ok{background:var(--acc);color:#fff}
+#toast.err{background:var(--dang);color:#fff}
+#toast.info{background:#2b3340;color:#e8edf2}
+
+.item{border-bottom:1px solid var(--line);padding:11px 0}
+.item:last-child{border-bottom:0}
+.item .t{font-size:15px;font-weight:600}
+.item .s{font-size:12px;color:var(--mut);margin-top:2px}
+.item.late .t{color:#ff8e8a}
+
+.tabs{display:flex;gap:7px;margin-bottom:13px;overflow-x:auto;padding-bottom:3px}
+.tabs button{
+  flex:0 0 auto;padding:9px 14px;border-radius:20px;border:1px solid var(--line);
+  background:#1b2129;color:#b9c4d1;font-size:13px;font-weight:600;
+}
+.tabs button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.empty{text-align:center;color:var(--mut);font-size:13px;padding:26px 10px;line-height:1.5}
+#qrbox{background:#fff;padding:16px;border-radius:13px;text-align:center}
+#qrbox img,#qrbox canvas{width:100%;max-width:250px;height:auto;image-rendering:pixelated}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:1px}
+.warnbar{background:#3a2d16;border:1px solid #6b5423;color:#e8c783;padding:11px;border-radius:11px;font-size:12.5px;line-height:1.5;margin-bottom:12px}
+hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+</style>
+</head>
+<body>
+
+<header>
+  <div style="flex:1">
+    <h1>Almacén de Herramienta</h1>
+    <div class="sub" id="hdrsub">Listo para escanear</div>
+  </div>
+  <button class="iconbtn" id="btnPanel">Panel</button>
+</header>
+
+<main>
+
+  <!-- ===== INICIO ===== -->
+  <section id="vInicio">
+    <div class="warnbar hide" id="avisoCam">Esta vista no puede usar la cámara. Sirve para probar la lógica tecleando folios. Para escanear de verdad, abre la app desde el archivo publicado en HTTPS.</div>
+    <div class="card" id="activeCard" style="display:none"></div>
+    <button class="big" id="btnScan">ESCANEAR</button>
+    <button class="sec" id="btnManual">Teclear folio</button>
+    <button class="sec" id="btnAlta">Registrarme (nueva persona)</button>
+    <div id="resumen" style="margin-top:18px"></div>
+  </section>
+
+  <!-- ===== ESCANEO ===== -->
+  <section id="vScan" class="hide">
+    <div id="scanwrap">
+      <video id="video" playsinline muted></video>
+      <div id="reticle"></div>
+      <div id="scanmsg">Acerca el código</div>
+    </div>
+    <div class="card" id="scanInfo"></div>
+    <button class="big grey" id="btnCerrarScan">Terminar</button>
+  </section>
+
+  <!-- ===== ALTA PERSONA ===== -->
+  <section id="vPersona" class="hide">
+    <div class="card">
+      <h2>Registrar persona</h2>
+      <p>Se le genera su QR al terminar. Lo puede guardar en el celular o imprimirlo.</p>
+    </div>
+    <label>Nombre completo</label>
+    <input id="pNombre" autocomplete="off" placeholder="Ej. Martín Flores">
+    <label>Área</label>
+    <input id="pArea" autocomplete="off" placeholder="Ej. Mantenimiento">
+    <label>Usuario de Teams o correo</label>
+    <input id="pTeams" autocomplete="off" inputmode="email" placeholder="nombre@empresa.com">
+    <div style="height:16px"></div>
+    <button class="big" id="btnGuardarPersona">Guardar y generar QR</button>
+    <button class="sec" id="btnCancelPersona">Cancelar</button>
+  </section>
+
+  <!-- ===== QR DE PERSONA ===== -->
+  <section id="vQR" class="hide">
+    <div class="card"><h2 id="qrNombre"></h2><p id="qrDatos"></p></div>
+    <div id="qrbox"></div>
+    <div style="height:14px"></div>
+    <button class="big" id="btnDescargarQR">Descargar imagen</button>
+    <button class="sec" id="btnImprimirQR">Imprimir credencial</button>
+    <button class="sec" id="btnQRListo">Listo</button>
+  </section>
+
+  <!-- ===== ALTA HERRAMIENTA ===== -->
+  <section id="vHerr" class="hide">
+    <div class="card">
+      <h2>Nueva herramienta</h2>
+      <p>Folio <span class="mono" id="hFolio"></span></p>
+    </div>
+    <label>¿Qué herramienta es?</label>
+    <input id="hNombre" autocomplete="off" placeholder="Ej. Dado de matraca 1/2&quot;">
+    <label>Tipo de control</label>
+    <select id="hTipo">
+      <option value="individual">Individual — esta pieza en particular</option>
+      <option value="lote">Por tipo — varias iguales, con cantidad</option>
+    </select>
+    <div id="hCantWrap" class="hide">
+      <label>¿Cuántas piezas hay en total?</label>
+      <input id="hCant" type="number" inputmode="numeric" min="1" value="10">
+    </div>
+    <div style="height:16px"></div>
+    <button class="big" id="btnGuardarHerr">Guardar</button>
+    <button class="sec" id="btnCancelHerr">Cancelar</button>
+  </section>
+
+  <!-- ===== CANTIDAD (lote) ===== -->
+  <section id="vCant" class="hide">
+    <div class="card"><h2 id="cTitulo"></h2><p id="cSub"></p></div>
+    <label id="cLabel">¿Cuántas?</label>
+    <input id="cValor" type="number" inputmode="numeric" min="1" value="1">
+    <div style="height:16px"></div>
+    <button class="big" id="btnCantOk">Confirmar</button>
+    <button class="sec" id="btnCantCancel">Cancelar</button>
+  </section>
+
+  <!-- ===== MANUAL ===== -->
+  <section id="vManual" class="hide">
+    <div class="card"><h2>Teclear folio</h2><p>Por si el código está maltratado o la cámara no lo lee.</p></div>
+    <label>Folio</label>
+    <input id="mFolio" autocomplete="off" class="mono" placeholder="HER-0001 o PER-0001" style="text-transform:uppercase">
+    <div style="height:16px"></div>
+    <button class="big" id="btnManualOk">Continuar</button>
+    <button class="sec" id="btnManualCancel">Cancelar</button>
+  </section>
+
+  <!-- ===== PIN ===== -->
+  <section id="vPin" class="hide">
+    <div class="card"><h2 id="pinTitulo">PIN de administrador</h2><p id="pinSub"></p></div>
+    <input id="pinVal" type="password" inputmode="numeric" maxlength="8" class="mono" style="text-align:center;font-size:26px;letter-spacing:8px">
+    <div style="height:16px"></div>
+    <button class="big" id="btnPinOk">Entrar</button>
+    <button class="sec" id="btnPinCancel">Cancelar</button>
+  </section>
+
+  <!-- ===== PANEL ===== -->
+  <section id="vPanel" class="hide">
+    <div class="tabs">
+      <button data-tab="fuera" class="on">Fuera</button>
+      <button data-tab="herr">Herramientas</button>
+      <button data-tab="per">Personas</button>
+      <button data-tab="hist">Historial</button>
+      <button data-tab="conf">Ajustes</button>
+    </div>
+    <div id="panelBody"></div>
+    <div style="height:12px"></div>
+    <button class="sec" id="btnSalirPanel">Volver al kiosco</button>
+  </section>
+
+</main>
+
+<div id="toast" class="hide"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>
+"use strict";
+
+/* ============ DATOS ============ */
+const KEY = "almacen_herramienta_v1";
+const DEF = {
+  personas: [],      // {id, nombre, area, teams, creado}
+  herramientas: [],  // {id, nombre, tipo:'individual'|'lote', total, creado}
+  prestamos: [],     // {id, perId, herrId, cant, salida, regreso|null, forzado}
+  config: { pin: "1234", horasAlerta: 12, seqPer: 0 }
+};
+const clon = o => JSON.parse(JSON.stringify(o));
+let DB = cargar();
+
+function cargar(){
+  try{
+    const r = localStorage.getItem(KEY);
+    if(!r) return clon(DEF);
+    const d = JSON.parse(r);
+    return Object.assign(clon(DEF), d,
+      { config: Object.assign(clon(DEF.config), d.config||{}) });
+  }catch(e){ return clon(DEF); }
+}
+function guardar(){
+  try{ localStorage.setItem(KEY, JSON.stringify(DB)); }
+  catch(e){ toast("No se pudo guardar. Revisa el espacio del celular.","err",5000); }
+}
+
+const perPorId  = id => DB.personas.find(p=>p.id===id);
+const herrPorId = id => DB.herramientas.find(h=>h.id===id);
+const abiertos  = () => DB.prestamos.filter(p=>!p.regreso);
+const abiertosDe= id => abiertos().filter(p=>p.perId===id);
+const fuera     = hid => abiertos().filter(p=>p.herrId===hid)
+                          .reduce((s,p)=>s+(p.cant||1),0);
+const disp      = h => (h.tipo==='lote' ? h.total - fuera(h.id) : (fuera(h.id)?0:1));
+const esTarde   = p => (Date.now()-p.salida) > DB.config.horasAlerta*3600e3;
+
+function nuevoIdPersona(){
+  DB.config.seqPer = (DB.config.seqPer||0) + 1;
+  let id = "PER-" + String(DB.config.seqPer).padStart(4,"0");
+  while(perPorId(id)){ DB.config.seqPer++; id = "PER-"+String(DB.config.seqPer).padStart(4,"0"); }
+  return id;
+}
+
+/* ============ UI BÁSICA ============ */
+const $ = s => document.querySelector(s);
+const VIEWS = ["vInicio","vScan","vPersona","vQR","vHerr","vCant","vManual","vPin","vPanel"];
+function ver(id){
+  VIEWS.forEach(v => $("#"+v).classList.toggle("hide", v!==id));
+  if(id!=="vScan") pararCamara();
+  window.scrollTo(0,0); $("main").scrollTop = 0;
+}
+let toastT;
+function toast(msg, tipo="info", ms=2600){
+  const t = $("#toast");
+  t.textContent = msg; t.className = tipo;
+  clearTimeout(toastT);
+  toastT = setTimeout(()=>t.className="hide", ms);
+  if(navigator.vibrate) navigator.vibrate(tipo==="err"?[90,60,90]:50);
+}
+const fmt = ts => new Date(ts).toLocaleString("es-MX",
+  {day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+function transcurrido(ts){
+  const m = Math.floor((Date.now()-ts)/60000);
+  if(m<60) return m+" min";
+  const h = Math.floor(m/60);
+  if(h<24) return h+" h "+(m%60)+" min";
+  return Math.floor(h/24)+" d "+(h%24)+" h";
+}
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g,
+  c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ============ SESIÓN ============ */
+let activa = null;          // persona en turno
+let timerSesion = null;
+const SESION_MS = 90000;
+
+function setActiva(p){
+  activa = p;
+  clearTimeout(timerSesion);
+  if(p) timerSesion = setTimeout(()=>{ setActiva(null); pintarInicio(); pintarScanInfo(); }, SESION_MS);
+  pintarInicio(); pintarScanInfo();
+}
+
+function pintarInicio(){
+  const c = $("#activeCard");
+  if(!activa){
+    c.style.display="none";
+    $("#hdrsub").textContent = "Listo para escanear";
+  } else {
+    const l = abiertosDe(activa.id);
+    c.style.display="block";
+    c.innerHTML = "<h2>"+esc(activa.nombre)+"</h2><p>"+esc(activa.area||"")+
+      " · <span class='mono'>"+esc(activa.id)+"</span></p>" +
+      (l.length ? "<p><b style='color:#f08a86'>Trae "+l.length+" registro"+(l.length>1?"s":"")+" sin devolver</b></p>"
+                : "<p style='color:#5fd39b'>Sin herramienta pendiente</p>");
+    $("#hdrsub").textContent = "Turno de "+activa.nombre.split(" ")[0];
+  }
+  pintarResumen();
+}
+
+function pintarResumen(){
+  const a = abiertos();
+  const tarde = a.filter(esTarde).length;
+  $("#resumen").innerHTML =
+    "<div class='card'><h2>Estado</h2>"+
+    "<p>"+DB.herramientas.length+" herramientas dadas de alta · "+DB.personas.length+" personas</p>"+
+    "<p><b>"+a.length+"</b> registro"+(a.length===1?"":"s")+" fuera del almacén"+
+    (tarde? " · <span class='pill late'>"+tarde+" con retraso</span>":"")+"</p></div>";
+}
+
+function pintarScanInfo(){
+  const d = $("#scanInfo");
+  if(!activa){
+    d.innerHTML = "<h2>Paso 1</h2><p>Escanea la credencial de la persona.</p>";
+  } else {
+    const l = abiertosDe(activa.id);
+    d.innerHTML = "<h2>"+esc(activa.nombre)+"</h2>"+
+      "<p>Escanea las herramientas. Una ya prestada a esta persona se devuelve sola.</p>"+
+      (l.length? "<p>Trae: "+l.map(p=>{
+          const h=herrPorId(p.herrId);
+          return esc(h?h.nombre:p.herrId)+(p.cant>1?" ×"+p.cant:"");
+        }).join(", ")+"</p>" : "");
+  }
+}
+
+/* ============ LÓGICA DE ESCANEO ============ */
+let pendiente = null;  // {folio} herramienta por dar de alta
+let cantCtx = null;    // contexto de la pantalla de cantidad
+
+function procesar(codigo){
+  const f = String(codigo||"").trim().toUpperCase();
+  if(!f) return;
+  if(f.startsWith("PER-")) return procesarPersona(f);
+  if(f.startsWith("HER-")) return procesarHerramienta(f);
+  toast("Código no reconocido: "+f, "err");
+}
+
+function procesarPersona(folio){
+  const p = perPorId(folio);
+  if(!p){
+    toast("Credencial no registrada. Regístrate primero.","err",3200);
+    return;
+  }
+  setActiva(p);
+  toast("Hola "+p.nombre.split(" ")[0], "ok");
+}
+
+function procesarHerramienta(folio){
+  const h = herrPorId(folio);
+  if(!h){
+    pendiente = { folio };
+    $("#hFolio").textContent = folio;
+    $("#hNombre").value = ""; $("#hTipo").value="individual";
+    $("#hCantWrap").classList.add("hide"); $("#hCant").value = 10;
+    pararCamara(); ver("vHerr"); $("#hNombre").focus();
+    return;
+  }
+  const mios = abiertos().filter(p=>p.herrId===h.id);
+  const mio  = activa ? mios.find(p=>p.perId===activa.id) : null;
+
+  // Devolución
+  if(mio){
+    if(h.tipo==="lote"){
+      cantCtx = {modo:"devolver", prestamo:mio, herr:h};
+      $("#cTitulo").textContent = "Devolver "+h.nombre;
+      $("#cSub").textContent = activa.nombre+" se llevó "+mio.cant;
+      $("#cLabel").textContent = "¿Cuántas regresa?";
+      $("#cValor").value = mio.cant; $("#cValor").max = mio.cant;
+      pararCamara(); ver("vCant"); return;
+    }
+    mio.regreso = Date.now(); guardar();
+    toast("Devuelto: "+h.nombre, "ok");
+    pintarInicio(); pintarScanInfo(); return;
+  }
+
+  // Está fuera, con otra persona
+  if(mios.length && h.tipo==="individual"){
+    const otro = perPorId(mios[0].perId);
+    toast("La trae "+(otro?otro.nombre:"otra persona")+". Solo esa persona la devuelve.", "err", 4200);
+    return;
+  }
+
+  // Préstamo: necesita persona
+  if(!activa){
+    toast("Primero escanea la credencial de la persona.", "err", 3200);
+    return;
+  }
+
+  if(h.tipo==="lote"){
+    const d = disp(h);
+    if(d<=0){ toast("No hay disponibles de "+h.nombre, "err"); return; }
+    cantCtx = {modo:"prestar", herr:h};
+    $("#cTitulo").textContent = h.nombre;
+    $("#cSub").textContent = "Disponibles: "+d+" de "+h.total;
+    $("#cLabel").textContent = "¿Cuántas se lleva?";
+    $("#cValor").value = 1; $("#cValor").max = d;
+    pararCamara(); ver("vCant"); return;
+  }
+
+  DB.prestamos.push({ id:"L"+Date.now()+Math.random().toString(36).slice(2,6),
+    perId:activa.id, herrId:h.id, cant:1, salida:Date.now(), regreso:null });
+  guardar();
+  toast("Salió: "+h.nombre, "ok");
+  pintarInicio(); pintarScanInfo();
+}
+
+/* ============ CÁMARA ============ */
+let stream=null, rafId=null, lastCode="", lastTime=0, detector=null, veniaCamara=false;
+const canvas = document.createElement("canvas");
+const ctx = canvas.getContext("2d", {willReadFrequently:true});
+
+const hayCamara = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
+                  && (window.isSecureContext !== false);
+async function iniciarCamara(){
+  if(!hayCamara){
+    toast("Esta vista no tiene acceso a la cámara. Usa 'Teclear folio'.","err",4600);
+    veniaCamara = false;
+    $("#mFolio").value=""; ver("vManual"); $("#mFolio").focus();
+    return;
+  }
+  veniaCamara = true;
+  ver("vScan"); pintarScanInfo();
+  $("#scanmsg").textContent = "Abriendo cámara...";
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:{ideal:"environment"}, width:{ideal:1280}, height:{ideal:1280} },
+      audio:false
+    });
+  }catch(e){
+    $("#scanmsg").textContent = "Sin acceso a la cámara";
+    toast("No se pudo abrir la cámara. Da permiso en el navegador o usa 'Teclear folio'.","err",5200);
+    return;
+  }
+  const v = $("#video");
+  v.srcObject = stream; await v.play().catch(()=>{});
+  $("#scanmsg").textContent = "Acerca el código";
+  if("BarcodeDetector" in window){
+    try{ detector = new BarcodeDetector({formats:["qr_code"]}); }catch(e){ detector=null; }
+  }
+  bucle();
+}
+function pararCamara(){
+  cancelAnimationFrame(rafId); rafId=null;
+  if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
+  const v=$("#video"); if(v) v.srcObject=null;
+}
+async function bucle(){
+  const v = $("#video");
+  if(!stream){ return; }
+  if(v.readyState >= 2 && v.videoWidth){
+    let code = null;
+    if(detector){
+      try{ const r = await detector.detect(v); if(r&&r.length) code = r[0].rawValue; }
+      catch(e){ detector = null; }
+    }
+    if(!code){
+      const w = 520, s = Math.min(v.videoWidth, v.videoHeight);
+      canvas.width = w; canvas.height = w;
+      ctx.drawImage(v, (v.videoWidth-s)/2, (v.videoHeight-s)/2, s, s, 0, 0, w, w);
+      const img = ctx.getImageData(0,0,w,w);
+      if(typeof jsQR === "function"){
+        const r = jsQR(img.data, w, w, {inversionAttempts:"dontInvert"});
+        if(r) code = r.data;
+      }
+    }
+    if(code){
+      const ahora = Date.now();
+      if(code !== lastCode || ahora-lastTime > 2200){
+        lastCode = code; lastTime = ahora;
+        $("#scanmsg").textContent = code;
+        procesar(code);
+      }
+    }
+  }
+  rafId = requestAnimationFrame(bucle);
+}
+
+/* ============ QR DE PERSONA ============ */
+function dibujarQR(cont, texto){
+  const qr = qrcode(0, "H");
+  qr.addData(texto); qr.make();
+  cont.innerHTML = qr.createImgTag(8, 16);
+}
+function qrDataURL(texto, escala){
+  const qr = qrcode(0,"H"); qr.addData(texto); qr.make();
+  const n = qr.getModuleCount(), b = 4, px = escala||14;
+  const cv = document.createElement("canvas");
+  cv.width = cv.height = (n+b*2)*px;
+  const c = cv.getContext("2d");
+  c.fillStyle="#fff"; c.fillRect(0,0,cv.width,cv.height);
+  c.fillStyle="#000";
+  for(let r=0;r<n;r++) for(let col=0;col<n;col++)
+    if(qr.isDark(r,col)) c.fillRect((col+b)*px,(r+b)*px,px,px);
+  return cv.toDataURL("image/png");
+}
+
+let personaQR = null;
+function mostrarQRPersona(p){
+  personaQR = p;
+  $("#qrNombre").textContent = p.nombre;
+  $("#qrDatos").innerHTML = esc(p.area||"") + " · <span class='mono'>"+esc(p.id)+"</span>" +
+    (p.teams? "<br>"+esc(p.teams) : "");
+  dibujarQR($("#qrbox"), p.id);
+  ver("vQR");
+}
+
+/* ============ PANEL ============ */
+let tabActual = "fuera";
+function abrirPanel(){ ver("vPanel"); pintarPanel(); }
+function pintarPanel(){
+  document.querySelectorAll(".tabs button").forEach(b=>
+    b.classList.toggle("on", b.dataset.tab===tabActual));
+  const b = $("#panelBody");
+  if(tabActual==="fuera")  return b.innerHTML = tabFuera();
+  if(tabActual==="herr")   return b.innerHTML = tabHerr();
+  if(tabActual==="per")    return b.innerHTML = tabPer();
+  if(tabActual==="hist")   return b.innerHTML = tabHist();
+  if(tabActual==="conf")   { b.innerHTML = tabConf(); engancharConf(); }
+}
+function tabFuera(){
+  const a = abiertos().sort((x,y)=>x.salida-y.salida);
+  if(!a.length) return "<div class='empty'>Nada fuera del almacén.<br>Todo está devuelto.</div>";
+  return "<div class='card'>"+a.map(p=>{
+    const h = herrPorId(p.herrId), per = perPorId(p.perId), t = esTarde(p);
+    return "<div class='item"+(t?" late":"")+"'>"+
+      "<div class='t'>"+esc(h?h.nombre:p.herrId)+(p.cant>1?" ×"+p.cant:"")+
+      (t?" <span class='pill late'>RETRASO</span>":"")+"</div>"+
+      "<div class='s'>"+esc(per?per.nombre:p.perId)+
+      (per&&per.area?" · "+esc(per.area):"")+"</div>"+
+      "<div class='s'>Salió "+fmt(p.salida)+" · hace "+transcurrido(p.salida)+
+      " · <span class='mono'>"+esc(p.herrId)+"</span></div>"+
+      (per&&per.teams? "<div class='s'>"+esc(per.teams)+"</div>":"")+
+      "</div>";
+  }).join("")+"</div>";
+}
+function tabHerr(){
+  if(!DB.herramientas.length) return "<div class='empty'>Aún no hay herramientas.<br>Escanea una etiqueta HER para darla de alta.</div>";
+  return "<div class='card'>"+DB.herramientas.map(h=>{
+    const d = disp(h), f = fuera(h.id);
+    const pill = h.tipo==="lote"
+      ? "<span class='pill "+(d>0?"ok":"out")+"'>"+d+" de "+h.total+"</span>"
+      : (f? "<span class='pill out'>FUERA</span>" : "<span class='pill ok'>EN ALMACÉN</span>");
+    return "<div class='item'><div class='t'>"+esc(h.nombre)+" "+pill+"</div>"+
+      "<div class='s'><span class='mono'>"+esc(h.id)+"</span> · "+
+      (h.tipo==="lote"?"por tipo":"individual")+"</div></div>";
+  }).join("")+"</div>";
+}
+function tabPer(){
+  if(!DB.personas.length) return "<div class='empty'>Aún no hay personas registradas.</div>";
+  return "<div class='card'>"+DB.personas.map(p=>{
+    const n = abiertosDe(p.id).length;
+    return "<div class='item'><div class='t'>"+esc(p.nombre)+
+      (n?" <span class='pill out'>"+n+" fuera</span>":"")+"</div>"+
+      "<div class='s'>"+esc(p.area||"sin área")+" · <span class='mono'>"+esc(p.id)+"</span></div>"+
+      (p.teams?"<div class='s'>"+esc(p.teams)+"</div>":"")+
+      "<div class='s'><a href='#' data-qr='"+esc(p.id)+"' style='color:#5fd39b'>Ver su QR</a></div>"+
+      "</div>";
+  }).join("")+"</div>";
+}
+function tabHist(){
+  const h = DB.prestamos.filter(p=>p.regreso).sort((a,b)=>b.regreso-a.regreso).slice(0,120);
+  if(!h.length) return "<div class='empty'>Todavía no hay devoluciones registradas.</div>";
+  return "<div class='card'>"+h.map(p=>{
+    const t = herrPorId(p.herrId), per = perPorId(p.perId);
+    return "<div class='item'><div class='t'>"+esc(t?t.nombre:p.herrId)+(p.cant>1?" ×"+p.cant:"")+"</div>"+
+      "<div class='s'>"+esc(per?per.nombre:p.perId)+"</div>"+
+      "<div class='s'>"+fmt(p.salida)+" → "+fmt(p.regreso)+"</div></div>";
+  }).join("")+"</div>";
+}
+function tabConf(){
+  return "<div class='card'><h2>Ajustes</h2>"+
+    "<label>PIN de administrador</label><input id='cfPin' class='mono' value='"+esc(DB.config.pin)+"' inputmode='numeric' maxlength='8'>"+
+    "<label>Marcar en rojo después de (horas)</label><input id='cfHoras' type='number' inputmode='numeric' min='1' value='"+DB.config.horasAlerta+"'>"+
+    "<div style='height:14px'></div><button class='sec' id='cfGuardar'>Guardar ajustes</button>"+
+    "</div>"+
+    "<div class='card'><h2>Respaldo</h2>"+
+    "<p>Todo vive en este celular. Exporta seguido para no perderlo si se pierde o se formatea el equipo.</p>"+
+    "<button class='sec' id='cfCSV'>Exportar CSV de movimientos</button>"+
+    "<button class='sec' id='cfJSON'>Exportar respaldo completo</button>"+
+    "<button class='sec' id='cfImport'>Importar respaldo</button>"+
+    "<input type='file' id='cfFile' accept='.json,application/json' class='hide'>"+
+    "</div>"+
+    "<div class='card'><h2>Credenciales</h2>"+
+    "<p>Genera una hoja con los QR de todas las personas registradas para imprimirla.</p>"+
+    "<button class='sec' id='cfHoja'>Hoja de credenciales</button></div>"+
+    "<div class='card'><h2>Zona de riesgo</h2>"+
+    "<p>Borra todo: personas, herramientas e historial. No se puede deshacer.</p>"+
+    "<button class='sec' id='cfBorrar' style='border-color:#6a2b28;color:#f08a86'>Borrar todos los datos</button></div>";
+}
+
+function engancharConf(){
+  $("#cfGuardar").onclick = ()=>{
+    const pin = $("#cfPin").value.trim();
+    const hrs = parseInt($("#cfHoras").value,10);
+    if(!/^\d{4,8}$/.test(pin)) return toast("El PIN debe ser de 4 a 8 dígitos","err");
+    if(!(hrs>0)) return toast("Horas inválidas","err");
+    DB.config.pin = pin; DB.config.horasAlerta = hrs; guardar();
+    toast("Ajustes guardados","ok");
+  };
+  $("#cfCSV").onclick = exportarCSV;
+  $("#cfJSON").onclick = exportarJSON;
+  $("#cfImport").onclick = ()=> $("#cfFile").click();
+  $("#cfFile").onchange = importarJSON;
+  $("#cfHoja").onclick = hojaCredenciales;
+  $("#cfBorrar").onclick = ()=>{
+    if(!confirm("¿Borrar TODO? Personas, herramientas e historial. No se puede deshacer.")) return;
+    if(!confirm("Última confirmación. ¿Seguro?")) return;
+    DB = clon(DEF); guardar(); setActiva(null); pintarPanel();
+    toast("Datos borrados","info");
+  };
+}
+
+/* ============ EXPORTAR ============ */
+async function bajar(nombre, contenido, tipo){
+  const blob = new Blob([contenido], {type:tipo});
+  try{
+    if(window.claude && claude.use){
+      const d = await claude.use("downloads");
+      if(d && d.download){ await d.download(blob, nombre); return; }
+    }
+  }catch(e){}
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = nombre; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 1500);
+}
+const cell = v => '"' + String(v==null?"":v).replace(/"/g,'""') + '"';
+function exportarCSV(){
+  const filas = [["folio_herramienta","herramienta","tipo","cantidad","folio_persona","persona","area","teams","salida","regreso","estado","horas_fuera"]];
+  DB.prestamos.slice().sort((a,b)=>b.salida-a.salida).forEach(p=>{
+    const h = herrPorId(p.herrId), per = perPorId(p.perId);
+    const fin = p.regreso || Date.now();
+    filas.push([p.herrId, h?h.nombre:"", h?h.tipo:"", p.cant||1, p.perId, per?per.nombre:"",
+      per?per.area:"", per?per.teams:"", fmt(p.salida), p.regreso?fmt(p.regreso):"",
+      p.regreso?"devuelto":(esTarde(p)?"FUERA CON RETRASO":"fuera"),
+      ((fin-p.salida)/3600e3).toFixed(1)]);
+  });
+  if(filas.length===1) return toast("No hay movimientos que exportar","info");
+  bajar("movimientos_herramienta.csv", "\uFEFF"+filas.map(f=>f.map(cell).join(",")).join("\r\n"),
+    "text/csv;charset=utf-8");
+  toast("CSV generado","ok");
+}
+function exportarJSON(){
+  bajar("respaldo_almacen_"+new Date().toISOString().slice(0,10)+".json",
+    JSON.stringify(DB,null,1), "application/json");
+  toast("Respaldo generado","ok");
+}
+function importarJSON(ev){
+  const f = ev.target.files && ev.target.files[0];
+  if(!f) return;
+  const fr = new FileReader();
+  fr.onload = () => {
+    try{
+      const d = JSON.parse(fr.result);
+      if(!d || !Array.isArray(d.personas) || !Array.isArray(d.herramientas) || !Array.isArray(d.prestamos))
+        throw new Error("formato");
+      if(!confirm("Esto reemplaza todos los datos de este celular. ¿Continuar?")) return;
+      DB = Object.assign(clon(DEF), d,
+        {config:Object.assign(clon(DEF.config), d.config||{})});
+      guardar(); setActiva(null); pintarPanel(); toast("Respaldo importado","ok");
+    }catch(e){ toast("Archivo inválido","err"); }
+  };
+  fr.readAsText(f);
+  ev.target.value = "";
+}
+function hojaCredenciales(){
+  if(!DB.personas.length) return toast("No hay personas registradas","info");
+  const w = window.open("", "_blank");
+  if(!w) return toast("El navegador bloqueó la ventana. Permite ventanas emergentes.","err",4200);
+  const tarjetas = DB.personas.map(p =>
+    "<div class='c'><img src='"+qrDataURL(p.id,8)+"'><div class='n'>"+esc(p.nombre)+
+    "</div><div class='a'>"+esc(p.area||"")+"</div><div class='f'>"+esc(p.id)+"</div></div>").join("");
+  w.document.write(
+    "<!doctype html><html><head><meta charset='utf-8'><title>Credenciales</title><style>"+
+    "@page{size:letter;margin:10mm}body{font-family:system-ui,sans-serif;margin:0}"+
+    ".g{display:flex;flex-wrap:wrap;gap:4mm}"+
+    ".c{width:58mm;border:1px dashed #999;border-radius:3mm;padding:3mm;text-align:center;page-break-inside:avoid}"+
+    ".c img{width:40mm;height:40mm}"+
+    ".n{font-weight:700;font-size:11pt;margin-top:1mm;line-height:1.2}"+
+    ".a{font-size:8pt;color:#555}.f{font-family:monospace;font-size:9pt;margin-top:1mm}"+
+    "</style></head><body><div class='g'>"+tarjetas+"</div></body></html>");
+  w.document.close();
+  setTimeout(()=>w.print(), 600);
+}
+
+/* ============ EVENTOS ============ */
+$("#btnScan").onclick   = iniciarCamara;
+$("#btnCerrarScan").onclick = ()=>{ veniaCamara=false; pararCamara(); setActiva(null); ver("vInicio"); };
+$("#btnManual").onclick = ()=>{ veniaCamara=false; $("#mFolio").value=""; ver("vManual"); $("#mFolio").focus(); };
+$("#btnManualCancel").onclick = ()=> ver("vInicio");
+$("#btnManualOk").onclick = ()=>{
+  const v = $("#mFolio").value.trim().toUpperCase();
+  if(!v) return toast("Escribe un folio","err");
+  ver("vInicio"); procesar(v);
+};
+$("#mFolio").addEventListener("keydown", e=>{ if(e.key==="Enter") $("#btnManualOk").click(); });
+
+$("#btnAlta").onclick = ()=>{
+  $("#pNombre").value=""; $("#pArea").value=""; $("#pTeams").value="";
+  ver("vPersona"); $("#pNombre").focus();
+};
+$("#btnCancelPersona").onclick = ()=> ver("vInicio");
+$("#btnGuardarPersona").onclick = ()=>{
+  const nombre = $("#pNombre").value.trim();
+  if(nombre.length < 3) return toast("Escribe el nombre completo","err");
+  const p = { id:nuevoIdPersona(), nombre, area:$("#pArea").value.trim(),
+    teams:$("#pTeams").value.trim(), creado:Date.now() };
+  DB.personas.push(p); guardar();
+  setActiva(p);
+  mostrarQRPersona(p);
+  toast("Registrado como "+p.id,"ok");
+};
+$("#btnQRListo").onclick = ()=> ver("vInicio");
+$("#btnDescargarQR").onclick = async ()=>{
+  if(!personaQR) return;
+  const nombre = "credencial_"+personaQR.id+"_"+personaQR.nombre.replace(/\s+/g,"_")+".png";
+  const url = qrDataURL(personaQR.id, 14);
+  const bin = atob(url.split(",")[1]);
+  const arr = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+  await bajar(nombre, arr, "image/png");
+  toast("Imagen descargada","ok");
+};
+$("#btnImprimirQR").onclick = ()=>{
+  if(!personaQR) return;
+  const p = personaQR;
+  const w = window.open("","_blank");
+  if(!w) return toast("El navegador bloqueó la ventana. Permite ventanas emergentes.","err",4200);
+  w.document.write("<!doctype html><html><head><meta charset='utf-8'><title>"+esc(p.id)+
+    "</title><style>@page{margin:14mm}body{font-family:system-ui,sans-serif;text-align:center}"+
+    "img{width:70mm;height:70mm}h2{margin:4mm 0 1mm;font-size:15pt}"+
+    "p{margin:0;color:#444;font-size:10pt}.f{font-family:monospace;margin-top:2mm;font-size:12pt}"+
+    "</style></head><body><img src='"+qrDataURL(p.id,10)+"'><h2>"+esc(p.nombre)+
+    "</h2><p>"+esc(p.area||"")+"</p><div class='f'>"+esc(p.id)+"</div></body></html>");
+  w.document.close(); setTimeout(()=>w.print(),600);
+};
+
+$("#hTipo").onchange = e => $("#hCantWrap").classList.toggle("hide", e.target.value!=="lote");
+$("#btnCancelHerr").onclick = ()=>{ pendiente=null; if(veniaCamara) iniciarCamara(); else ver("vInicio"); };
+$("#btnGuardarHerr").onclick = ()=>{
+  if(!pendiente) return ver("vInicio");
+  const nombre = $("#hNombre").value.trim();
+  if(nombre.length < 2) return toast("Escribe qué herramienta es","err");
+  const tipo = $("#hTipo").value;
+  let total = 1;
+  if(tipo==="lote"){
+    total = parseInt($("#hCant").value,10);
+    if(!(total>0)) return toast("Cantidad inválida","err");
+  }
+  DB.herramientas.push({ id:pendiente.folio, nombre, tipo, total, creado:Date.now() });
+  guardar();
+  const folio = pendiente.folio; pendiente = null;
+  toast("Alta: "+nombre,"ok");
+  ver("vInicio");
+  procesarHerramienta(folio);   // continúa con el préstamo
+  // si el préstamo quedó resuelto (no abrió la pantalla de cantidad), vuelve a la cámara
+  if(veniaCamara && !$("#vInicio").classList.contains("hide")) iniciarCamara();
+};
+
+$("#btnCantCancel").onclick = ()=>{ cantCtx=null; ver("vInicio"); };
+$("#btnCantOk").onclick = ()=>{
+  if(!cantCtx) return ver("vInicio");
+  const n = parseInt($("#cValor").value,10);
+  if(!(n>0)) return toast("Cantidad inválida","err");
+  if(cantCtx.modo==="prestar"){
+    const d = disp(cantCtx.herr);
+    if(n>d) return toast("Solo hay "+d+" disponibles","err");
+    DB.prestamos.push({ id:"L"+Date.now()+Math.random().toString(36).slice(2,6),
+      perId:activa.id, herrId:cantCtx.herr.id, cant:n, salida:Date.now(), regreso:null });
+    guardar(); toast("Salieron "+n+" · "+cantCtx.herr.nombre,"ok");
+  } else {
+    const pr = cantCtx.prestamo;
+    if(n>pr.cant) return toast("Se llevó "+pr.cant,"err");
+    if(n===pr.cant){ pr.regreso = Date.now(); }
+    else {
+      pr.cant -= n;
+      DB.prestamos.push({ id:"L"+Date.now()+Math.random().toString(36).slice(2,6),
+        perId:pr.perId, herrId:pr.herrId, cant:n, salida:pr.salida, regreso:Date.now() });
+    }
+    guardar(); toast("Devueltas "+n,"ok");
+  }
+  cantCtx = null;
+  pintarInicio();
+  if(veniaCamara) iniciarCamara(); else ver("vInicio");
+};
+
+$("#btnPanel").onclick = ()=>{
+  veniaCamara=false;
+  $("#pinVal").value=""; $("#pinSub").textContent="Para ver reportes y ajustes.";
+  pararCamara(); ver("vPin"); $("#pinVal").focus();
+};
+$("#btnPinCancel").onclick = ()=> ver("vInicio");
+$("#btnPinOk").onclick = ()=>{
+  if($("#pinVal").value !== DB.config.pin) return toast("PIN incorrecto","err");
+  abrirPanel();
+};
+$("#pinVal").addEventListener("keydown", e=>{ if(e.key==="Enter") $("#btnPinOk").click(); });
+$("#btnSalirPanel").onclick = ()=>{ setActiva(null); ver("vInicio"); };
+document.querySelectorAll(".tabs button").forEach(b=>
+  b.onclick = ()=>{ tabActual = b.dataset.tab; pintarPanel(); });
+$("#panelBody").addEventListener("click", e=>{
+  const a = e.target.closest("[data-qr]");
+  if(a){ e.preventDefault(); const p = perPorId(a.dataset.qr); if(p) mostrarQRPersona(p); }
+});
+
+document.addEventListener("visibilitychange", ()=>{ if(document.hidden) pararCamara(); });
+
+/* ============ ARRANQUE ============ */
+if(!hayCamara) $("#avisoCam").classList.remove("hide");
+pintarInicio();
+ver("vInicio");
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+</script>
+</body>
+</html>
