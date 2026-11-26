@@ -181,9 +181,10 @@ input:focus,select:focus{outline:2px solid var(--verde);border-color:transparent
       <div class="pasotxt"><div class="k" id="k2">Prestar</div><div class="v" id="v2">¿Qué se lleva?</div></div>
     </div>
     <div id="scanwrap2"></div>
-    <div class="card"><p id="ayuda2">Escanea la etiqueta de cada herramienta. Puedes escanear varias seguidas.</p></div>
+    <button class="big" id="btnAbrirCam">ESCANEAR HERRAMIENTA</button>
+    <div class="card"><p id="ayuda2">Toca el botón y acerca la etiqueta. Después de cada una, la cámara se cierra sola.</p></div>
     <div id="listaTurno"></div>
-    <button class="big" id="btnListo">LISTO</button>
+    <button class="big gris" id="btnListo">LISTO, TERMINAR</button>
     <button class="sec" id="btnFolioManual">Teclear folio</button>
     <button class="sec" id="btnCancelar2">Cancelar</button>
   </section>
@@ -445,6 +446,7 @@ function pintarListaPersonas(filtro){
 }
 
 function elegirPersona(p){
+  pararCamara();          // cerrar la cámara en cuanto sabemos quién es
   persona = p;
   if(!esPrestar() && !abiertosDe(p.id).length){
     toast(p.nombre.split(" ")[0] + " no tiene herramienta pendiente.", "err", 3600);
@@ -463,11 +465,24 @@ function irPaso2(){
   $("#hdrTit").textContent = persona.nombre;
   $("#hdrSub").textContent = "Paso 2 de 2 · " + (dev ? "herramientas que regresa" : "herramientas que se lleva");
   $("#ayuda2").textContent = dev
-    ? "Escanea la etiqueta de cada herramienta que regresa."
-    : "Escanea la etiqueta de cada herramienta. Puedes escanear varias seguidas.";
-  $("#btnListo").className = "big" + (dev ? " ambar" : "");
+    ? "Toca el botón y acerca la etiqueta de la herramienta que regresa."
+    : "Toca el botón y acerca la etiqueta de la herramienta. Después de cada una, la cámara se cierra sola.";
+  $("#btnAbrirCam").className = "big" + (dev ? " ambar" : "");
+  $("#btnAbrirCam").textContent = hechas.length
+    ? (dev ? "ESCANEAR OTRA DEVOLUCIÓN" : "ESCANEAR OTRA HERRAMIENTA")
+    : (dev ? "ESCANEAR HERRAMIENTA" : "ESCANEAR HERRAMIENTA");
+  pararCamara();                 // nunca se queda abierta al llegar aquí
+  moverCamara("#scanwrap2");
+  $("#scanwrap2").classList.add("hide");
+  $("#btnAbrirCam").classList.remove("hide");
   pintarTurno();
   ver("vPaso2");
+}
+
+// abre la cámara del paso 2 solo cuando la persona lo pide
+function abrirCamaraHerr(){
+  $("#scanwrap2").classList.remove("hide");
+  $("#btnAbrirCam").classList.add("hide");
   moverCamara("#scanwrap2");
   iniciarCamara();
 }
@@ -554,11 +569,12 @@ function herramienta(folio){
   const mio = abiertos().find(p => p.herrId === h.id && p.perId === persona.id);
 
   if(esPrestar()){
-    if(mio) return toast(h.nombre + ": ya la trae " + persona.nombre.split(" ")[0] + ".", "info", 3000);
+    if(mio){ toast(h.nombre + ": ya la trae " + persona.nombre.split(" ")[0] + ".", "info", 3200); return irPaso2(); }
     const ocupada = abiertos().find(p => p.herrId === h.id);
     if(h.tipo === "individual" && ocupada){
       const otro = perPorId(ocupada.perId);
-      return toast("La trae " + (otro ? otro.nombre : "otra persona") + ".", "err", 4000);
+      toast("La trae " + (otro ? otro.nombre : "otra persona") + ".", "err", 4200);
+      return irPaso2();
     }
     if(h.tipo === "lote"){
       const d = disp(h);
@@ -569,17 +585,20 @@ function herramienta(folio){
       cant: 1, salida: Date.now(), regreso: null });
     guardar(); hechas.push(h.nombre);
     toast("Salió: " + h.nombre, "ok");
-    pintarTurno();
+    irPaso2();            // cierra la cámara y queda lista para la siguiente
     return;
   }
 
   // devolver
   if(!mio){
     const ocupada = abiertos().find(p => p.herrId === h.id);
-    if(!ocupada) return toast(h.nombre + " ya estaba en el almacén.", "info", 3000);
-    const otro = perPorId(ocupada.perId);
-    return toast("Esa la trae " + (otro ? otro.nombre : "otra persona") + ", no " +
-      persona.nombre.split(" ")[0] + ".", "err", 4200);
+    if(!ocupada) toast(h.nombre + " ya estaba en el almacén.", "info", 3200);
+    else {
+      const otro = perPorId(ocupada.perId);
+      toast("Esa la trae " + (otro ? otro.nombre : "otra persona") + ", no " +
+        persona.nombre.split(" ")[0] + ".", "err", 4200);
+    }
+    return irPaso2();
   }
   if(h.tipo === "lote"){
     return pedirCantidad("devolver", h, mio.cant, mio.cant, "¿Cuántas regresa?",
@@ -588,7 +607,7 @@ function herramienta(folio){
   mio.regreso = Date.now(); guardar();
   hechas.push(h.nombre);
   toast("Devuelto: " + h.nombre, "ok");
-  pintarTurno();
+  irPaso2();              // cierra la cámara y queda lista para la siguiente
 }
 
 const nuevoIdPrestamo = () => "L" + Date.now() + Math.random().toString(36).slice(2,6);
@@ -933,6 +952,7 @@ $("#btnDevolver").onclick = () => {
 };
 $("#btnCancelar1").onclick = inicio;
 $("#btnCancelar2").onclick = inicio;
+$("#btnAbrirCam").onclick = abrirCamaraHerr;
 $("#btnListo").onclick = terminar;
 $("#btnFinOk").onclick = inicio;
 
