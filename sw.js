@@ -1,4 +1,4 @@
-const CACHE = "almacen-v9";
+const CACHE = "almacen-v10";
 const FILES = [
   "./","./index.html","./manifest.json",
   "https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js",
