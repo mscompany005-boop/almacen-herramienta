@@ -301,7 +301,10 @@ function nuevoIdPersona(){
 // El QR de una persona lleva sus datos dentro, para que cualquier kiosco
 // la pueda dar de alta sola al escanearla por primera vez.
 const limpio = t => String(t||"").replace(/\|/g,"/").replace(/\n/g," ").trim();
-const codigoPersona = p => ["PER1", p.id, limpio(p.nombre), limpio(p.area), limpio(p.teams)].join("|");
+// Los acentos se escapan: la librería de QR no maneja UTF-8 y el código saldría ilegible.
+const aQR = t => encodeURIComponent(limpio(t));
+const deQR = t => { try{ return decodeURIComponent(String(t||"")); }catch(e){ return String(t||""); } };
+const codigoPersona = p => ["PER1", p.id, aQR(p.nombre), aQR(p.area), aQR(p.teams)].join("|");
 
 /* ============ UI BÁSICA ============ */
 const $ = s => document.querySelector(s);
@@ -407,8 +410,8 @@ function procesarPersonaQR(crudo){
   if(!id) return toast("Credencial ilegible","err");
   let p = perPorId(id);
   if(!p){
-    p = { id, nombre:(t[2]||"Sin nombre").trim(), area:(t[3]||"").trim(),
-          teams:(t[4]||"").trim(), creado:Date.now() };
+    p = { id, nombre:(deQR(t[2])||"Sin nombre").trim(), area:deQR(t[3]).trim(),
+          teams:deQR(t[4]).trim(), creado:Date.now() };
     DB.personas.push(p); guardar();
     toast("Alta automática: "+p.nombre, "ok", 3200);
   } else {
