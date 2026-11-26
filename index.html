@@ -159,6 +159,13 @@ input:focus,select:focus{outline:2px solid var(--marca);border-color:transparent
 .okbig h2{margin:10px 0 6px;font-size:19px;text-transform:none;letter-spacing:0}
 .okbig p{color:var(--mut);font-size:14px;margin:3px 0}
 .marca-pie{text-align:center;color:var(--mut);font-size:11px;margin-top:18px;opacity:.75}
+.thumb{width:100%;height:100%;object-fit:cover;display:block}
+.minibox{width:46px;height:46px;border-radius:7px;overflow:hidden;background:var(--fondo);
+  border:1px solid var(--linea);flex:0 0 auto;display:flex;align-items:center;
+  justify-content:center;color:var(--mut);font-size:17px}
+.fila{display:flex;align-items:center;gap:11px}
+.fila .cuerpo{flex:1;min-width:0}
+#fotoPrev{width:100%;max-width:260px;border-radius:10px;border:1px solid var(--linea);display:block;margin:0 auto}
 </style>
 </head>
 <body>
@@ -274,6 +281,11 @@ input:focus,select:focus{outline:2px solid var(--marca);border-color:transparent
       <label>¿Cuántas piezas hay en total?</label>
       <input id="hCant" type="number" inputmode="numeric" min="1" value="10">
     </div>
+    <label>Foto de referencia (opcional)</label>
+    <div id="fotoZona">
+      <button class="sec" id="btnTomarFoto" style="margin-top:0">Tomar foto</button>
+      <input type="file" id="fotoInput" accept="image/*" capture="environment" class="hide">
+    </div>
     <div style="height:14px"></div>
     <button class="big" id="btnGuardarHerr">Guardar y continuar</button>
     <button class="sec" id="btnCancelHerr">Cancelar</button>
@@ -281,7 +293,8 @@ input:focus,select:focus{outline:2px solid var(--marca);border-color:transparent
 
   <!-- ===================== CANTIDAD (lotes) ===================== -->
   <section id="vCant" class="hide">
-    <div class="card"><h2 id="cTitulo"></h2><p id="cSub"></p></div>
+    <div class="card"><h2 id="cTitulo"></h2><p id="cSub"></p>
+      <div id="cFoto" style="text-align:center;margin-top:10px"></div></div>
     <label id="cLabel">¿Cuántas?</label>
     <input id="cValor" type="number" inputmode="numeric" min="1" value="1">
     <div style="height:14px"></div>
@@ -355,7 +368,7 @@ input:focus,select:focus{outline:2px solid var(--marca);border-color:transparent
 "use strict";
 
 /* ======================= DATOS ======================= */
-const VERSION = 10;
+const VERSION = 11;
 const KEY = "almacen_herramienta_v1";
 const DEF = {
   personas: [],      // {id, nombre, teams, creado}
@@ -413,6 +426,74 @@ const limpio = t => String(t||"").replace(/\|/g,"/").replace(/\n/g," ").trim();
 const aQR  = t => encodeURIComponent(limpio(t));
 const deQR = t => { try{ return decodeURIComponent(String(t||"")); }catch(e){ return String(t||""); } };
 const codigoPersona = p => ["PER1", p.id, aQR(p.nombre), "", aQR(p.teams)].join("|");
+
+/* ======================= FOTOS (IndexedDB) ======================= */
+// Las fotos NO van en el almacenamiento normal: llenarían el cupo y se
+// perderían los registros. Van en una base aparte del navegador.
+let _fdb = null;
+function fotosDB(){
+  if(_fdb) return _fdb;
+  _fdb = new Promise((ok, mal) => {
+    try{
+      const req = indexedDB.open("almacen_fotos", 1);
+      req.onupgradeneeded = () => req.result.createObjectStore("fotos");
+      req.onsuccess = () => ok(req.result);
+      req.onerror = () => mal(req.error);
+    }catch(e){ mal(e); }
+  }).catch(() => null);
+  return _fdb;
+}
+async function fotoGuardar(id, dataUrl){
+  const db = await fotosDB(); if(!db) return false;
+  return new Promise(ok => {
+    try{
+      const t = db.transaction("fotos", "readwrite");
+      t.objectStore("fotos").put(dataUrl, id);
+      t.oncomplete = () => ok(true);
+      t.onerror = () => ok(false);
+    }catch(e){ ok(false); }
+  });
+}
+async function fotoLeer(id){
+  const db = await fotosDB(); if(!db) return null;
+  return new Promise(ok => {
+    try{
+      const r = db.transaction("fotos", "readonly").objectStore("fotos").get(id);
+      r.onsuccess = () => ok(r.result || null);
+      r.onerror = () => ok(null);
+    }catch(e){ ok(null); }
+  });
+}
+// Reduce la foto a una miniatura para que ocupe poco y cargue rápido.
+function miniatura(file, lado = 320, calidad = 0.6){
+  return new Promise((ok, mal) => {
+    const fr = new FileReader();
+    fr.onerror = () => mal(new Error("lectura"));
+    fr.onload = () => {
+      const img = new Image();
+      img.onerror = () => mal(new Error("imagen"));
+      img.onload = () => {
+        const e = Math.min(1, lado / Math.max(img.width, img.height));
+        const cv = document.createElement("canvas");
+        cv.width = Math.round(img.width * e);
+        cv.height = Math.round(img.height * e);
+        cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+        ok(cv.toDataURL("image/jpeg", calidad));
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+// pinta las fotos de las listas ya dibujadas
+async function pintarFotos(cont){
+  const nodos = (cont || document).querySelectorAll("[data-foto]:not([data-listo])");
+  for(const n of nodos){
+    n.setAttribute("data-listo", "1");
+    const d = await fotoLeer(n.getAttribute("data-foto"));
+    if(d) n.innerHTML = "<img src='" + d + "' class='thumb'>";
+  }
+}
 
 /* ======================= UI ======================= */
 const $ = s => document.querySelector(s);
@@ -587,9 +668,12 @@ function pintarTurno(){
   if(!esPrestar() && pend.length){
     html += "<div class='card'><h2>Le falta regresar</h2>" + pend.map(p => {
       const h = herrPorId(p.herrId);
-      return "<div class='item'><div class='t'>" + esc(h ? h.nombre : p.herrId) +
+      return "<div class='item'><div class='fila'>" +
+        "<div class='minibox' data-foto='" + esc(p.herrId) + "'>&#128295;</div>" +
+        "<div class='cuerpo'><div class='t'>" + esc(h ? h.nombre : p.herrId) +
         (p.cant > 1 ? " ×" + p.cant : "") + "</div>" +
-        "<div class='s'><span class='mono'>" + esc(p.herrId) + "</span> · hace " + transcurrido(p.salida) + "</div></div>";
+        "<div class='s'><span class='mono'>" + esc(p.herrId) + "</span> · hace " +
+        transcurrido(p.salida) + "</div></div></div></div>";
     }).join("") + "</div>";
   }
   if(esPrestar() && pend.length){
@@ -601,6 +685,7 @@ function pintarTurno(){
     }).join("") + "</div>";
   }
   $("#listaTurno").innerHTML = html;
+  pintarFotos($("#listaTurno"));
 }
 
 /* ---------- procesar un código ---------- */
@@ -652,6 +737,7 @@ function herramienta(folio){
     $("#hFolio").textContent = folio;
     $("#hNombre").value = ""; $("#hTipo").value = "individual";
     $("#hCantWrap").classList.add("hide"); $("#hCant").value = 10;
+    fotoNueva = null; pintarZonaFoto();
     pararCamara(); ver("vHerr"); $("#hNombre").focus();
     return;
   }
@@ -702,10 +788,51 @@ function herramienta(folio){
 
 const nuevoIdPrestamo = () => "L" + Date.now() + Math.random().toString(36).slice(2,6);
 
+/* ---------- foto al dar de alta ---------- */
+let fotoNueva = null;      // dataURL de la miniatura pendiente de guardar
+let fotoDestino = null;    // folio al que se le va a cambiar la foto desde el Panel
+
+function pintarZonaFoto(){
+  const z = $("#fotoZona");
+  z.innerHTML = fotoNueva
+    ? "<img id='fotoPrev' src='" + fotoNueva + "'>" +
+      "<button class='sec' id='btnOtraFoto'>Tomar otra</button>" +
+      "<button class='sec' id='btnQuitarFoto'>Quitar foto</button>" +
+      "<input type='file' id='fotoInput' accept='image/*' capture='environment' class='hide'>"
+    : "<button class='sec' id='btnTomarFoto' style='margin-top:0'>Tomar foto</button>" +
+      "<input type='file' id='fotoInput' accept='image/*' capture='environment' class='hide'>";
+  const abre = () => $("#fotoInput").click();
+  if($("#btnTomarFoto")) $("#btnTomarFoto").onclick = abre;
+  if($("#btnOtraFoto")) $("#btnOtraFoto").onclick = abre;
+  if($("#btnQuitarFoto")) $("#btnQuitarFoto").onclick = () => { fotoNueva = null; pintarZonaFoto(); };
+  $("#fotoInput").onchange = async ev => {
+    const f = ev.target.files && ev.target.files[0];
+    ev.target.value = "";
+    if(!f) return;
+    try{
+      fotoNueva = await miniatura(f);
+      pintarZonaFoto();
+      if(fotoDestino){
+        await fotoGuardar(fotoDestino, fotoNueva);
+        const hh = herrPorId(fotoDestino);
+        if(hh){ hh.foto = true; guardar(); }
+        toast("Foto guardada", "ok");
+        const destino = fotoDestino; fotoDestino = null; fotoNueva = null;
+        ver("vPanel"); pintarPanel();
+        return;
+      }
+    }catch(e){ toast("No se pudo usar esa foto", "err"); }
+  };
+}
+
 function pedirCantidad(accion, h, valor, max, etiqueta, sub, prestamo){
   cantCtx = { accion, herr: h, prestamo };
   $("#cTitulo").textContent = h.nombre;
   $("#cSub").textContent = sub;
+  fotoLeer(h.id).then(d => {
+    const c = $("#cFoto");
+    if(c) c.innerHTML = d ? "<img src='" + d + "' style='width:100%;max-width:200px;border-radius:8px;border:1px solid var(--linea)'>" : "";
+  });
   $("#cLabel").textContent = etiqueta;
   $("#cValor").value = valor; $("#cValor").max = max;
   pararCamara(); ver("vCant");
@@ -864,6 +991,7 @@ function pintarPanel(){
   else if(tab === "per") b.innerHTML = tabPer();
   else if(tab === "hist") b.innerHTML = tabHist();
   else { b.innerHTML = tabConf(); engancharConf(); }
+  pintarFotos(b);
 }
 function tabFuera(){
   const a = abiertos().sort((x,y) => x.salida - y.salida);
@@ -887,9 +1015,13 @@ function tabHerr(){
     const pill = h.tipo === "lote"
       ? "<span class='pill " + (d > 0 ? "ok" : "out") + "'>" + d + " de " + h.total + "</span>"
       : (f ? "<span class='pill out'>FUERA</span>" : "<span class='pill ok'>EN ALMACÉN</span>");
-    return "<div class='item'><div class='t'>" + esc(h.nombre) + " " + pill + "</div>" +
+    return "<div class='item'><div class='fila'>" +
+      "<div class='minibox' data-foto='" + esc(h.id) + "'>&#128247;</div>" +
+      "<div class='cuerpo'><div class='t'>" + esc(h.nombre) + " " + pill + "</div>" +
       "<div class='s'><span class='mono'>" + esc(h.id) + "</span> · " +
-      (h.tipo === "lote" ? "por tipo" : "individual") + "</div></div>";
+      (h.tipo === "lote" ? "por tipo" : "individual") + "</div>" +
+      "<div class='s'><a href='#' data-setfoto='" + esc(h.id) + "' style='color:var(--marca2);font-weight:600'>" +
+      (h.foto ? "Cambiar foto" : "Agregar foto") + "</a></div></div></div></div>";
   }).join("") + "</div>";
 }
 function tabPer(){
@@ -1110,7 +1242,11 @@ $("#btnManualOk").onclick = () => {
 $("#mFolio").addEventListener("keydown", e => { if(e.key === "Enter") $("#btnManualOk").click(); });
 
 $("#hTipo").onchange = e => $("#hCantWrap").classList.toggle("hide", e.target.value !== "lote");
-$("#btnCancelHerr").onclick = () => { folioPendiente = null; irPaso2(); };
+$("#btnCancelHerr").onclick = () => {
+  folioPendiente = null; fotoNueva = null;
+  if(fotoDestino){ fotoDestino = null; ver("vPanel"); pintarPanel(); return; }
+  irPaso2();
+};
 $("#btnGuardarHerr").onclick = () => {
   if(!folioPendiente) return inicio();
   const nombre = $("#hNombre").value.trim();
@@ -1121,9 +1257,11 @@ $("#btnGuardarHerr").onclick = () => {
     total = parseInt($("#hCant").value,10);
     if(!(total > 0)) return toast("Cantidad inválida", "err");
   }
-  DB.herramientas.push({ id: folioPendiente, nombre, tipo, total, creado: Date.now() });
+  DB.herramientas.push({ id: folioPendiente, nombre, tipo, total, creado: Date.now(),
+    foto: !!fotoNueva });
   guardar();
   const folio = folioPendiente; folioPendiente = null;
+  if(fotoNueva){ fotoGuardar(folio, fotoNueva); fotoNueva = null; }
   toast("Añadida al catálogo: " + nombre, "ok", 3000);
   irPaso2();
   herramienta(folio);
@@ -1221,7 +1359,23 @@ $("#btnSalirPanel").onclick = inicio;
 document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => { tab = b.dataset.tab; pintarPanel(); });
 $("#panelBody").addEventListener("click", e => {
   const a = e.target.closest("[data-qr]");
-  if(a){ e.preventDefault(); const p = perPorId(a.dataset.qr); if(p) mostrarQRPersona(p); }
+  if(a){ e.preventDefault(); const p = perPorId(a.dataset.qr); if(p) mostrarQRPersona(p); return; }
+  const f = e.target.closest("[data-setfoto]");
+  if(f){
+    e.preventDefault();
+    const h = herrPorId(f.dataset.setfoto);
+    if(!h) return;
+    fotoDestino = h.id; fotoNueva = null;
+    $("#hFolio").textContent = h.id;
+    $("#hNombre").value = h.nombre;
+    $("#hTipo").value = h.tipo;
+    $("#hCantWrap").classList.toggle("hide", h.tipo !== "lote");
+    $("#hCant").value = h.total;
+    folioPendiente = null;
+    pintarZonaFoto();
+    ver("vHerr");
+    setTimeout(() => $("#fotoInput").click(), 150);
+  }
 });
 
 document.addEventListener("visibilitychange", () => { if(document.hidden) pararCamara(); });
