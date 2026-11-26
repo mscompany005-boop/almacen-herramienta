@@ -293,6 +293,7 @@ input:focus,select:focus{outline:2px solid var(--verde);border-color:transparent
 "use strict";
 
 /* ======================= DATOS ======================= */
+const VERSION = 8;
 const KEY = "almacen_herramienta_v1";
 const DEF = {
   personas: [],      // {id, nombre, teams, creado}
@@ -356,7 +357,7 @@ const $ = s => document.querySelector(s);
 const VIEWS = ["vInicio","vPaso1","vPaso2","vFin","vHerr","vCant","vManual","vPersona","vQR","vPin","vPanel"];
 function ver(id){
   VIEWS.forEach(v => $("#"+v).classList.toggle("hide", v !== id));
-  if(id !== "vPaso1" && id !== "vPaso2") pararCamara();
+  pararCamara();          // cambiar de pantalla SIEMPRE apaga la cámara
   $("main").scrollTop = 0;
 }
 const esc = s => String(s==null?"":s).replace(/[&<>"']/g,
@@ -404,7 +405,8 @@ function pintarResumen(){
     "<p><b style='color:" + (a.length ? "#f0b86e" : "#5fd39b") + "'>" + a.length + "</b> " +
       (a.length === 1 ? "herramienta fuera" : "herramientas fuera") +
       (tarde ? " · <span class='pill late'>" + tarde + " con retraso</span>" : "") + "</p>" +
-    "<p>" + DB.herramientas.length + " en el catálogo · " + DB.personas.length + " personas</p></div>";
+    "<p>" + DB.herramientas.length + " en el catálogo · " + DB.personas.length + " personas</p>" +
+    "<p style='font-size:11px;opacity:.6'>versión " + VERSION + "</p></div>";
 }
 
 /* ---------- PASO 1: identificar a la persona ---------- */
@@ -639,6 +641,8 @@ function terminar(){
 
 /* ======================= CÁMARA ======================= */
 let stream = null, rafId = null, lastCode = "", lastTime = 0, detector = null;
+let abriendo = false;          // evita que dos llamadas creen dos cámaras
+const streamsVivos = [];       // por si alguno quedara suelto
 const canvas = document.createElement("canvas");
 const cctx = canvas.getContext("2d", { willReadFrequently: true });
 const hayCamara = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
@@ -654,23 +658,33 @@ function moverCamara(sel){
   if(destino && camBox.parentNode !== destino){ destino.innerHTML = ""; destino.appendChild(camBox); }
 }
 
+let camaraPedida = false;
 async function iniciarCamara(){
+  camaraPedida = true;
   if(!hayCamara){
     $("#scanmsg").textContent = "Sin cámara en esta vista";
     return;
   }
-  if(stream) return;
+  if(stream || abriendo) return;
+  abriendo = true;
   $("#scanmsg").textContent = "Abriendo cámara...";
+  let s2 = null;
   try{
-    stream = await navigator.mediaDevices.getUserMedia({
+    s2 = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 1280 } },
       audio: false
     });
   }catch(e){
+    abriendo = false;
     $("#scanmsg").textContent = "Sin acceso a la cámara";
     toast("Da permiso de cámara al navegador, o usa 'Teclear folio'.", "err", 5200);
     return;
   }
+  abriendo = false;
+  streamsVivos.push(s2);
+  // si mientras se abría nos pidieron apagarla, se apaga y no se usa
+  if(camaraPedida === false){ s2.getTracks().forEach(t => t.stop()); return; }
+  stream = s2;
   const v = $("#video");
   v.srcObject = stream; await v.play().catch(()=>{});
   $("#scanmsg").textContent = "Acerca el código";
@@ -680,9 +694,16 @@ async function iniciarCamara(){
   bucle();
 }
 function pararCamara(){
+  camaraPedida = false;
   cancelAnimationFrame(rafId); rafId = null;
   if(stream){ stream.getTracks().forEach(t => t.stop()); stream = null; }
-  const v = $("#video"); if(v) v.srcObject = null;
+  // por si alguna llamada anterior dejó un stream suelto
+  while(streamsVivos.length){
+    const s = streamsVivos.pop();
+    try{ s.getTracks().forEach(t => t.stop()); }catch(e){}
+  }
+  const v = $("#video");
+  if(v){ try{ v.pause(); }catch(e){} v.srcObject = null; v.removeAttribute("src"); v.load && v.load(); }
   lastCode = "";
 }
 async function bucle(){
