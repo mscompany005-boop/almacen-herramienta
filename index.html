@@ -106,19 +106,21 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
     <h1>Almacén de Herramienta</h1>
     <div class="sub" id="hdrsub">Listo para escanear</div>
   </div>
-  <button class="iconbtn" id="btnPanel">Panel</button>
+  <button class="iconbtn soloKiosco" id="btnPanel">Panel</button>
 </header>
 
 <main>
 
   <!-- ===== INICIO ===== -->
   <section id="vInicio">
-    <div class="warnbar hide" id="avisoCam">Esta vista no puede usar la cámara. Sirve para probar la lógica tecleando folios. Para escanear de verdad, abre la app desde el archivo publicado en HTTPS.</div>
+    <div class="warnbar hide" id="avisoCam">Esta vista no puede usar la cámara. Sirve para probar la lógica tecleando folios. Para escanear de verdad, abre la app desde la liga en HTTPS.</div>
+    <div class="warnbar hide" id="avisoStore">Este navegador no está guardando los datos. Todo lo que registres se perderá al recargar. Abre la app desde su liga normal, no desde un archivo ni en modo incógnito.</div>
+    <div class="card modoReg hide"><h2>Registro de personal</h2><p>Llena tus datos una sola vez. Se te genera tu credencial con código QR: guárdala en tu celular o imprímela y muéstrala en el almacén cada vez que saques herramienta.</p></div>
     <div class="card" id="activeCard" style="display:none"></div>
-    <button class="big" id="btnScan">ESCANEAR</button>
-    <button class="sec" id="btnManual">Teclear folio</button>
+    <button class="big soloKiosco" id="btnScan">ESCANEAR</button>
+    <button class="sec soloKiosco" id="btnManual">Teclear folio</button>
     <button class="sec" id="btnAlta">Registrarme (nueva persona)</button>
-    <div id="resumen" style="margin-top:18px"></div>
+    <div id="resumen" class="soloKiosco" style="margin-top:18px"></div>
   </section>
 
   <!-- ===== ESCANEO ===== -->
@@ -179,6 +181,17 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
     <div style="height:16px"></div>
     <button class="big" id="btnGuardarHerr">Guardar</button>
     <button class="sec" id="btnCancelHerr">Cancelar</button>
+  </section>
+
+  <!-- ===== QUIEN SE LA LLEVA ===== -->
+  <section id="vQuien" class="hide">
+    <div class="card" id="quienHerr"></div>
+    <h3 style="font-size:15px;margin:4px 0 10px">¿Quién se la lleva?</h3>
+    <button class="big" id="btnQuienScan">ESCANEAR SU CREDENCIAL</button>
+    <input id="quienBuscar" autocomplete="off" placeholder="o busca por nombre" style="margin-top:12px">
+    <div id="quienLista"></div>
+    <button class="sec" id="btnQuienNueva">Registrar persona nueva</button>
+    <button class="sec" id="btnQuienCancel">Cancelar</button>
   </section>
 
   <!-- ===== CANTIDAD (lote) ===== -->
@@ -253,9 +266,22 @@ function cargar(){
       { config: Object.assign(clon(DEF.config), d.config||{}) });
   }catch(e){ return clon(DEF); }
 }
+let storageOK = true;
+try{
+  localStorage.setItem("__prueba__","1");
+  storageOK = localStorage.getItem("__prueba__")==="1";
+  localStorage.removeItem("__prueba__");
+}catch(e){ storageOK = false; }
+
 function guardar(){
-  try{ localStorage.setItem(KEY, JSON.stringify(DB)); }
-  catch(e){ toast("No se pudo guardar. Revisa el espacio del celular.","err",5000); }
+  try{
+    localStorage.setItem(KEY, JSON.stringify(DB));
+    if(localStorage.getItem(KEY) === null) throw new Error("no persiste");
+  }catch(e){
+    storageOK = false;
+    const av = $("#avisoStore"); if(av) av.classList.remove("hide");
+    toast("No se pudo guardar en este navegador.","err",5000);
+  }
 }
 
 const perPorId  = id => DB.personas.find(p=>p.id===id);
@@ -268,15 +294,18 @@ const disp      = h => (h.tipo==='lote' ? h.total - fuera(h.id) : (fuera(h.id)?0
 const esTarde   = p => (Date.now()-p.salida) > DB.config.horasAlerta*3600e3;
 
 function nuevoIdPersona(){
-  DB.config.seqPer = (DB.config.seqPer||0) + 1;
-  let id = "PER-" + String(DB.config.seqPer).padStart(4,"0");
-  while(perPorId(id)){ DB.config.seqPer++; id = "PER-"+String(DB.config.seqPer).padStart(4,"0"); }
+  let id;
+  do { id = "PER-" + Math.random().toString(36).slice(2,8).toUpperCase(); } while(perPorId(id));
   return id;
 }
+// El QR de una persona lleva sus datos dentro, para que cualquier kiosco
+// la pueda dar de alta sola al escanearla por primera vez.
+const limpio = t => String(t||"").replace(/\|/g,"/").replace(/\n/g," ").trim();
+const codigoPersona = p => ["PER1", p.id, limpio(p.nombre), limpio(p.area), limpio(p.teams)].join("|");
 
 /* ============ UI BÁSICA ============ */
 const $ = s => document.querySelector(s);
-const VIEWS = ["vInicio","vScan","vPersona","vQR","vHerr","vCant","vManual","vPin","vPanel"];
+const VIEWS = ["vInicio","vScan","vPersona","vQR","vHerr","vQuien","vCant","vManual","vPin","vPanel"];
 function ver(id){
   VIEWS.forEach(v => $("#"+v).classList.toggle("hide", v!==id));
   if(id!=="vScan") pararCamara();
@@ -316,6 +345,7 @@ function setActiva(p){
 
 function pintarInicio(){
   const c = $("#activeCard");
+  if(typeof MODO_REGISTRO !== "undefined" && MODO_REGISTRO){ c.style.display="none"; return; }
   if(!activa){
     c.style.display="none";
     $("#hdrsub").textContent = "Listo para escanear";
@@ -361,11 +391,31 @@ let pendiente = null;  // {folio} herramienta por dar de alta
 let cantCtx = null;    // contexto de la pantalla de cantidad
 
 function procesar(codigo){
-  const f = String(codigo||"").trim().toUpperCase();
-  if(!f) return;
+  const crudo = String(codigo||"").trim();
+  if(!crudo) return;
+  if(crudo.startsWith("PER1|")) return procesarPersonaQR(crudo);
+  const f = crudo.toUpperCase();
   if(f.startsWith("PER-")) return procesarPersona(f);
   if(f.startsWith("HER-")) return procesarHerramienta(f);
   toast("Código no reconocido: "+f, "err");
+}
+
+// QR de credencial con datos: da de alta a quien no conozcamos todavía
+function procesarPersonaQR(crudo){
+  const t = crudo.split("|");
+  const id = (t[1]||"").trim();
+  if(!id) return toast("Credencial ilegible","err");
+  let p = perPorId(id);
+  if(!p){
+    p = { id, nombre:(t[2]||"Sin nombre").trim(), area:(t[3]||"").trim(),
+          teams:(t[4]||"").trim(), creado:Date.now() };
+    DB.personas.push(p); guardar();
+    toast("Alta automática: "+p.nombre, "ok", 3200);
+  } else {
+    toast("Hola "+p.nombre.split(" ")[0], "ok");
+  }
+  if(herrPendiente){ return entregarA(p); }
+  setActiva(p);
 }
 
 function procesarPersona(folio){
@@ -374,6 +424,7 @@ function procesarPersona(folio){
     toast("Credencial no registrada. Regístrate primero.","err",3200);
     return;
   }
+  if(herrPendiente){ return entregarA(p); }
   setActiva(p);
   toast("Hola "+p.nombre.split(" ")[0], "ok");
 }
@@ -413,11 +464,8 @@ function procesarHerramienta(folio){
     return;
   }
 
-  // Préstamo: necesita persona
-  if(!activa){
-    toast("Primero escanea la credencial de la persona.", "err", 3200);
-    return;
-  }
+  // Préstamo: si no sabemos quién es, lo preguntamos aquí mismo
+  if(!activa){ return pedirPersona(h); }
 
   if(h.tipo==="lote"){
     const d = disp(h);
@@ -435,6 +483,51 @@ function procesarHerramienta(folio){
   guardar();
   toast("Salió: "+h.nombre, "ok");
   pintarInicio(); pintarScanInfo();
+}
+
+/* ============ ¿QUIÉN SE LA LLEVA? ============ */
+let herrPendiente = null;
+
+function pedirPersona(h, reciénDadaDeAlta){
+  herrPendiente = h;
+  const d = disp(h);
+  const estado = h.tipo==="lote"
+    ? d+" de "+h.total+" disponibles"
+    : (d>0 ? "En almacén" : "Fuera");
+  $("#quienHerr").innerHTML =
+    "<h2>"+esc(h.nombre)+"</h2>"+
+    "<p><span class='mono'>"+esc(h.id)+"</span> · "+
+    (h.tipo==="lote"?"por tipo":"individual")+" · "+estado+"</p>"+
+    "<p class='pill ok' style='display:inline-block'>"+
+    (reciénDadaDeAlta ? "AÑADIDA AL CATÁLOGO" : "YA ESTABA DADA DE ALTA")+"</p>";
+  $("#quienBuscar").value = "";
+  pintarListaPersonas("");
+  pararCamara();
+  ver("vQuien");
+}
+
+function pintarListaPersonas(filtro){
+  const f = filtro.trim().toLowerCase();
+  let ps = DB.personas.slice();
+  if(f) ps = ps.filter(p => (p.nombre+" "+(p.area||"")).toLowerCase().includes(f));
+  ps = ps.slice(0, 12);
+  const cont = $("#quienLista");
+  if(!DB.personas.length){
+    cont.innerHTML = "<div class='empty'>Todavía no hay nadie registrado.<br>Escanea su credencial o regístralo abajo.</div>";
+    return;
+  }
+  if(!ps.length){ cont.innerHTML = "<div class='empty'>Nadie coincide con esa búsqueda.</div>"; return; }
+  cont.innerHTML = "<div class='card' style='margin-top:10px'>"+ps.map(p=>
+    "<div class='item' data-per='"+esc(p.id)+"' style='cursor:pointer'>"+
+    "<div class='t'>"+esc(p.nombre)+"</div>"+
+    "<div class='s'>"+esc(p.area||"sin área")+"</div></div>").join("")+"</div>";
+}
+
+function entregarA(p){
+  if(!herrPendiente) return ver("vInicio");
+  const h = herrPendiente; herrPendiente = null;
+  setActiva(p);
+  procesarHerramienta(h.id);
 }
 
 /* ============ CÁMARA ============ */
@@ -533,7 +626,7 @@ function mostrarQRPersona(p){
   $("#qrNombre").textContent = p.nombre;
   $("#qrDatos").innerHTML = esc(p.area||"") + " · <span class='mono'>"+esc(p.id)+"</span>" +
     (p.teams? "<br>"+esc(p.teams) : "");
-  dibujarQR($("#qrbox"), p.id);
+  dibujarQR($("#qrbox"), codigoPersona(p));
   ver("vQR");
 }
 
@@ -614,8 +707,13 @@ function tabConf(){
     "<input type='file' id='cfFile' accept='.json,application/json' class='hide'>"+
     "</div>"+
     "<div class='card'><h2>Credenciales</h2>"+
-    "<p>Genera una hoja con los QR de todas las personas registradas para imprimirla.</p>"+
-    "<button class='sec' id='cfHoja'>Hoja de credenciales</button></div>"+
+    "<p>Hoja con los QR de todas las personas registradas, lista para imprimir.</p>"+
+    "<button class='sec' id='cfHoja'>Hoja de credenciales</button>"+
+    "<p style='margin-top:12px'>Liga para que el personal se registre desde su propio celular. Ahí solo ven el formulario, no el escáner.</p>"+
+    "<button class='sec' id='cfLiga'>Ver liga de registro</button></div>"+
+    "<div class='card'><h2>Etiquetas de herramienta</h2>"+
+    "<p>Imprime las etiquetas con el nombre de cada herramienta ya dada de alta, para pegarlas encima de las provisionales.</p>"+
+    "<button class='sec' id='cfEtiquetas'>Imprimir etiquetas con nombre</button></div>"+
     "<div class='card'><h2>Zona de riesgo</h2>"+
     "<p>Borra todo: personas, herramientas e historial. No se puede deshacer.</p>"+
     "<button class='sec' id='cfBorrar' style='border-color:#6a2b28;color:#f08a86'>Borrar todos los datos</button></div>";
@@ -635,6 +733,8 @@ function engancharConf(){
   $("#cfImport").onclick = ()=> $("#cfFile").click();
   $("#cfFile").onchange = importarJSON;
   $("#cfHoja").onclick = hojaCredenciales;
+  $("#cfLiga").onclick = mostrarLigaRegistro;
+  $("#cfEtiquetas").onclick = hojaEtiquetas;
   $("#cfBorrar").onclick = ()=>{
     if(!confirm("¿Borrar TODO? Personas, herramientas e historial. No se puede deshacer.")) return;
     if(!confirm("Última confirmación. ¿Seguro?")) return;
@@ -698,22 +798,57 @@ function importarJSON(ev){
 }
 function hojaCredenciales(){
   if(!DB.personas.length) return toast("No hay personas registradas","info");
-  const w = window.open("", "_blank");
-  if(!w) return toast("El navegador bloqueó la ventana. Permite ventanas emergentes.","err",4200);
   const tarjetas = DB.personas.map(p =>
-    "<div class='c'><img src='"+qrDataURL(p.id,8)+"'><div class='n'>"+esc(p.nombre)+
+    "<div class='c'><img src='"+qrDataURL(codigoPersona(p),8)+"'><div class='n'>"+esc(p.nombre)+
     "</div><div class='a'>"+esc(p.area||"")+"</div><div class='f'>"+esc(p.id)+"</div></div>").join("");
-  w.document.write(
-    "<!doctype html><html><head><meta charset='utf-8'><title>Credenciales</title><style>"+
+  ventana("Credenciales",
     "@page{size:letter;margin:10mm}body{font-family:system-ui,sans-serif;margin:0}"+
     ".g{display:flex;flex-wrap:wrap;gap:4mm}"+
     ".c{width:58mm;border:1px dashed #999;border-radius:3mm;padding:3mm;text-align:center;page-break-inside:avoid}"+
     ".c img{width:40mm;height:40mm}"+
     ".n{font-weight:700;font-size:11pt;margin-top:1mm;line-height:1.2}"+
-    ".a{font-size:8pt;color:#555}.f{font-family:monospace;font-size:9pt;margin-top:1mm}"+
-    "</style></head><body><div class='g'>"+tarjetas+"</div></body></html>");
+    ".a{font-size:8pt;color:#555}.f{font-family:monospace;font-size:9pt;margin-top:1mm}",
+    "<div class='g'>"+tarjetas+"</div>");
+}
+
+function ventana(titulo, estilo, cuerpo){
+  const w = window.open("", "_blank");
+  if(!w){ toast("El navegador bloqueó la ventana. Permite ventanas emergentes.","err",4200); return null; }
+  w.document.write("<!doctype html><html><head><meta charset='utf-8'><title>"+titulo+
+    "</title><style>"+estilo+"</style></head><body>"+cuerpo+"</body></html>");
   w.document.close();
-  setTimeout(()=>w.print(), 600);
+  setTimeout(()=>w.print(), 700);
+  return w;
+}
+
+function hojaEtiquetas(){
+  if(!DB.herramientas.length) return toast("Aún no hay herramientas dadas de alta","info");
+  const et = DB.herramientas.map(h =>
+    "<div class='e'><img src='"+qrDataURL(h.id,8)+"'>"+
+    "<div class='n'>"+esc(h.nombre.toUpperCase())+"</div>"+
+    "<div class='f'>"+esc(h.id)+(h.tipo==="lote"?" · "+h.total+" pzas":"")+"</div></div>").join("");
+  ventana("Etiquetas de herramienta",
+    "@page{size:letter;margin:10mm}body{font-family:system-ui,sans-serif;margin:0}"+
+    ".g{display:flex;flex-wrap:wrap;gap:3mm}"+
+    ".e{width:45mm;border:1px dashed #999;border-radius:2mm;padding:2mm;text-align:center;page-break-inside:avoid}"+
+    ".e img{width:33mm;height:33mm}"+
+    ".n{font-weight:700;font-size:9pt;line-height:1.15;margin-top:1mm;word-wrap:break-word}"+
+    ".f{font-family:monospace;font-size:7pt;color:#666;margin-top:1mm}",
+    "<div class='g'>"+et+"</div>");
+}
+
+function mostrarLigaRegistro(){
+  const liga = location.origin + location.pathname + "#registro";
+  const cont = $("#panelBody");
+  const caja = document.createElement("div");
+  caja.className = "card";
+  caja.innerHTML = "<h2>Liga de registro</h2>"+
+    "<p style='word-break:break-all;color:#e8edf2'>"+esc(liga)+"</p>"+
+    "<div style='background:#fff;padding:12px;border-radius:10px;text-align:center'>"+
+    "<img src='"+qrDataURL(liga,8)+"' style='width:100%;max-width:220px'></div>"+
+    "<p>Que escaneen este código con su celular. Solo verán el formulario de registro.</p>";
+  cont.insertBefore(caja, cont.firstChild);
+  caja.scrollIntoView({behavior:"smooth", block:"center"});
 }
 
 /* ============ EVENTOS ============ */
@@ -739,15 +874,22 @@ $("#btnGuardarPersona").onclick = ()=>{
   const p = { id:nuevoIdPersona(), nombre, area:$("#pArea").value.trim(),
     teams:$("#pTeams").value.trim(), creado:Date.now() };
   DB.personas.push(p); guardar();
-  setActiva(p);
+  if(!MODO_REGISTRO) setActiva(p);
   mostrarQRPersona(p);
-  toast("Registrado como "+p.id,"ok");
+  toast(MODO_REGISTRO ? "Listo, "+p.nombre.split(" ")[0]+". Guarda tu credencial." : "Registrado","ok", 3600);
 };
-$("#btnQRListo").onclick = ()=> ver("vInicio");
+$("#btnQRListo").onclick = ()=>{
+  if(herrPendiente && activa){ return entregarA(activa); }
+  if(MODO_REGISTRO){
+    $("#pNombre").value=""; $("#pArea").value=""; $("#pTeams").value="";
+    ver("vPersona"); return;
+  }
+  ver("vInicio");
+};
 $("#btnDescargarQR").onclick = async ()=>{
   if(!personaQR) return;
   const nombre = "credencial_"+personaQR.id+"_"+personaQR.nombre.replace(/\s+/g,"_")+".png";
-  const url = qrDataURL(personaQR.id, 14);
+  const url = qrDataURL(codigoPersona(personaQR), 14);
   const bin = atob(url.split(",")[1]);
   const arr = new Uint8Array(bin.length);
   for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
@@ -763,7 +905,7 @@ $("#btnImprimirQR").onclick = ()=>{
     "</title><style>@page{margin:14mm}body{font-family:system-ui,sans-serif;text-align:center}"+
     "img{width:70mm;height:70mm}h2{margin:4mm 0 1mm;font-size:15pt}"+
     "p{margin:0;color:#444;font-size:10pt}.f{font-family:monospace;margin-top:2mm;font-size:12pt}"+
-    "</style></head><body><img src='"+qrDataURL(p.id,10)+"'><h2>"+esc(p.nombre)+
+    "</style></head><body><img src='"+qrDataURL(codigoPersona(p),10)+"'><h2>"+esc(p.nombre)+
     "</h2><p>"+esc(p.area||"")+"</p><div class='f'>"+esc(p.id)+"</div></body></html>");
   w.document.close(); setTimeout(()=>w.print(),600);
 };
@@ -782,13 +924,25 @@ $("#btnGuardarHerr").onclick = ()=>{
   }
   DB.herramientas.push({ id:pendiente.folio, nombre, tipo, total, creado:Date.now() });
   guardar();
-  const folio = pendiente.folio; pendiente = null;
-  toast("Alta: "+nombre,"ok");
-  ver("vInicio");
-  procesarHerramienta(folio);   // continúa con el préstamo
-  // si el préstamo quedó resuelto (no abrió la pantalla de cantidad), vuelve a la cámara
-  if(veniaCamara && !$("#vInicio").classList.contains("hide")) iniciarCamara();
+  const nueva = herrPorId(pendiente.folio); pendiente = null;
+  toast("Añadida: "+nombre,"ok");
+  if(activa){ ver("vInicio"); procesarHerramienta(nueva.id); }
+  else { pedirPersona(nueva, true); }
 };
+
+$("#quienBuscar").addEventListener("input", e => pintarListaPersonas(e.target.value));
+$("#quienLista").addEventListener("click", e => {
+  const it = e.target.closest("[data-per]");
+  if(!it) return;
+  const p = perPorId(it.dataset.per);
+  if(p) entregarA(p);
+});
+$("#btnQuienScan").onclick = ()=>{ iniciarCamara(); };
+$("#btnQuienNueva").onclick = ()=>{
+  $("#pNombre").value=""; $("#pArea").value=""; $("#pTeams").value="";
+  ver("vPersona"); $("#pNombre").focus();
+};
+$("#btnQuienCancel").onclick = ()=>{ herrPendiente=null; ver("vInicio"); };
 
 $("#btnCantCancel").onclick = ()=>{ cantCtx=null; ver("vInicio"); };
 $("#btnCantOk").onclick = ()=>{
@@ -839,7 +993,19 @@ $("#panelBody").addEventListener("click", e=>{
 document.addEventListener("visibilitychange", ()=>{ if(document.hidden) pararCamara(); });
 
 /* ============ ARRANQUE ============ */
-if(!hayCamara) $("#avisoCam").classList.remove("hide");
+const MODO_REGISTRO = location.hash.toLowerCase().indexOf("registro") >= 0;
+if(MODO_REGISTRO){
+  document.querySelectorAll(".soloKiosco").forEach(e=>e.classList.add("hide"));
+  document.querySelectorAll(".modoReg").forEach(e=>e.classList.remove("hide"));
+  $("#btnAlta").className = "big";
+  $("#btnAlta").textContent = "REGISTRARME";
+  $("#hdrsub").textContent = "Registro de personal";
+  $("#btnQRListo").textContent = "Registrar a otra persona";
+  $("#btnCancelPersona").classList.add("hide");
+} else if(!hayCamara){
+  $("#avisoCam").classList.remove("hide");
+}
+if(!storageOK) $("#avisoStore").classList.remove("hide");
 pintarInicio();
 ver("vInicio");
 if("serviceWorker" in navigator){
