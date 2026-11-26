@@ -180,6 +180,15 @@ input:focus,select:focus{outline:2px solid var(--verde);border-color:transparent
       <div class="pasonum">2</div>
       <div class="pasotxt"><div class="k" id="k2">Prestar</div><div class="v" id="v2">¿Qué se lleva?</div></div>
     </div>
+    <div class="card" id="cardAtiende" style="padding:11px 14px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="flex:1">
+          <div style="font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;font-weight:700" id="etqAtiende">Recibe</div>
+          <div style="font-size:15px;font-weight:700" id="txtAtiende">—</div>
+        </div>
+        <button class="iconbtn" id="btnCambiaAtiende">Cambiar</button>
+      </div>
+    </div>
     <div id="scanwrap2"></div>
     <button class="big" id="btnAbrirCam">ESCANEAR HERRAMIENTA</button>
     <div class="card"><p id="ayuda2">Toca el botón y acerca la etiqueta. Después de cada una, la cámara se cierra sola.</p></div>
@@ -187,6 +196,18 @@ input:focus,select:focus{outline:2px solid var(--verde);border-color:transparent
     <button class="big gris" id="btnListo">LISTO, TERMINAR</button>
     <button class="sec" id="btnFolioManual">Teclear folio</button>
     <button class="sec" id="btnCancelar2">Cancelar</button>
+  </section>
+
+  <!-- ===================== QUIÉN ATIENDE ===================== -->
+  <section id="vAtiende" class="hide">
+    <div class="card"><h2>¿Quién está atendiendo el almacén?</h2>
+      <p>Queda grabado en cada movimiento, para saber quién entregó y quién recibió.</p></div>
+    <label>Nombre de quien atiende</label>
+    <input id="atNombre" autocomplete="off" placeholder="Ej. Martín Flores">
+    <div id="atLista"></div>
+    <div style="height:14px"></div>
+    <button class="big" id="btnAtGuardar">Guardar</button>
+    <button class="sec" id="btnAtCancel">Cancelar</button>
   </section>
 
   <!-- ===================== RESUMEN ===================== -->
@@ -293,13 +314,13 @@ input:focus,select:focus{outline:2px solid var(--verde);border-color:transparent
 "use strict";
 
 /* ======================= DATOS ======================= */
-const VERSION = 8;
+const VERSION = 9;
 const KEY = "almacen_herramienta_v1";
 const DEF = {
   personas: [],      // {id, nombre, teams, creado}
   herramientas: [],  // {id, nombre, tipo:'individual'|'lote', total, creado}
   prestamos: [],     // {id, perId, herrId, cant, salida, regreso|null}
-  config: { pin: "1234", horasAlerta: 12 }
+  config: { pin: "1234", horasAlerta: 12, encargado: "" }
 };
 const clon = o => JSON.parse(JSON.stringify(o));
 
@@ -354,7 +375,7 @@ const codigoPersona = p => ["PER1", p.id, aQR(p.nombre), "", aQR(p.teams)].join(
 
 /* ======================= UI ======================= */
 const $ = s => document.querySelector(s);
-const VIEWS = ["vInicio","vPaso1","vPaso2","vFin","vHerr","vCant","vManual","vPersona","vQR","vPin","vPanel"];
+const VIEWS = ["vInicio","vPaso1","vPaso2","vAtiende","vFin","vHerr","vCant","vManual","vPersona","vQR","vPin","vPanel"];
 function ver(id){
   VIEWS.forEach(v => $("#"+v).classList.toggle("hide", v !== id));
   pararCamara();          // cambiar de pantalla SIEMPRE apaga la cámara
@@ -412,6 +433,7 @@ function pintarResumen(){
 /* ---------- PASO 1: identificar a la persona ---------- */
 function irPaso1(m){
   modo = m; persona = null; hechas = [];
+  if(!encargado()){ return abrirAtiende(); }   // la primera vez se pregunta quién atiende
   const dev = !esPrestar();
   $("#barra1").classList.toggle("dev", dev);
   $("#k1").textContent = dev ? "Devolver" : "Prestar";
@@ -457,6 +479,30 @@ function elegirPersona(p){
   irPaso2();
 }
 
+/* ---------- quién atiende el almacén ---------- */
+const encargado = () => (DB.config.encargado || "").trim();
+
+function pintarAtiende(){
+  const dev = !esPrestar();
+  $("#etqAtiende").textContent = dev ? "Recibe" : "Entrega";
+  const e = encargado();
+  $("#txtAtiende").textContent = e || "sin definir";
+  $("#txtAtiende").style.color = e ? "#e8edf2" : "#f0b86e";
+}
+
+function abrirAtiende(){
+  pararCamara();
+  $("#atNombre").value = encargado();
+  const ps = DB.personas.slice(0, 10);
+  $("#atLista").innerHTML = ps.length
+    ? "<div class='card' style='margin-top:10px'><h2>O elige de los registrados</h2>" +
+      ps.map(p => "<div class='item tap' data-at='" + esc(p.nombre) + "'><div class='t'>" +
+        esc(p.nombre) + "</div></div>").join("") + "</div>"
+    : "";
+  ver("vAtiende");
+  $("#atNombre").focus();
+}
+
 /* ---------- PASO 2: herramientas ---------- */
 function irPaso2(){
   const dev = !esPrestar();
@@ -469,6 +515,7 @@ function irPaso2(){
   $("#ayuda2").textContent = dev
     ? "Toca el botón y acerca la etiqueta de la herramienta que regresa."
     : "Toca el botón y acerca la etiqueta de la herramienta. Después de cada una, la cámara se cierra sola.";
+  pintarAtiende();
   $("#btnAbrirCam").className = "big" + (dev ? " ambar" : "");
   $("#btnAbrirCam").textContent = hechas.length
     ? (dev ? "ESCANEAR OTRA DEVOLUCIÓN" : "ESCANEAR OTRA HERRAMIENTA")
@@ -584,7 +631,7 @@ function herramienta(folio){
       return pedirCantidad("prestar", h, 1, d, "¿Cuántas se lleva?", "Disponibles: " + d + " de " + h.total);
     }
     DB.prestamos.push({ id: nuevoIdPrestamo(), perId: persona.id, herrId: h.id,
-      cant: 1, salida: Date.now(), regreso: null });
+      cant: 1, salida: Date.now(), regreso: null, entrego: encargado() });
     guardar(); hechas.push(h.nombre);
     toast("Salió: " + h.nombre, "ok");
     irPaso2();            // cierra la cámara y queda lista para la siguiente
@@ -606,7 +653,7 @@ function herramienta(folio){
     return pedirCantidad("devolver", h, mio.cant, mio.cant, "¿Cuántas regresa?",
       "Se llevó " + mio.cant, mio);
   }
-  mio.regreso = Date.now(); guardar();
+  mio.regreso = Date.now(); mio.recibio = encargado(); guardar();
   hechas.push(h.nombre);
   toast("Devuelto: " + h.nombre, "ok");
   irPaso2();              // cierra la cámara y queda lista para la siguiente
@@ -632,7 +679,9 @@ function terminar(){
     "<h2>" + (n ? (dev ? "Devolución registrada" : "Préstamo registrado") : "Sin cambios") + "</h2>" +
     (n ? "<p><b>" + esc(persona.nombre) + "</b></p>" +
          "<p>" + n + (n === 1 ? " herramienta " : " herramientas ") + (dev ? "devueltas" : "entregadas") + "</p>" +
-         "<p style='margin-top:8px;color:#5fd39b'>" + hechas.map(esc).join(" · ") + "</p>"
+         "<p style='margin-top:8px;color:#5fd39b'>" + hechas.map(esc).join(" · ") + "</p>" +
+         (encargado() ? "<p style='margin-top:8px'>" + (dev ? "Recibió: " : "Entregó: ") +
+            "<b>" + esc(encargado()) + "</b></p>" : "")
        : "<p>No se registró ninguna herramienta.</p>");
   $("#hdrTit").textContent = "Listo";
   $("#hdrSub").textContent = "";
@@ -786,6 +835,7 @@ function tabFuera(){
       "<div class='s'>" + esc(per ? per.nombre : p.perId) + "</div>" +
       "<div class='s'>Salió " + fmt(p.salida) + " · hace " + transcurrido(p.salida) +
       " · <span class='mono'>" + esc(p.herrId) + "</span></div>" +
+      (p.entrego ? "<div class='s'>Entregó: " + esc(p.entrego) + "</div>" : "") +
       (per && per.teams ? "<div class='s'>" + esc(per.teams) + "</div>" : "") + "</div>";
   }).join("") + "</div>";
 }
@@ -819,13 +869,19 @@ function tabHist(){
     return "<div class='item'><div class='t'>" + esc(t ? t.nombre : p.herrId) +
       (p.cant > 1 ? " ×" + p.cant : "") + "</div>" +
       "<div class='s'>" + esc(per ? per.nombre : p.perId) + "</div>" +
-      "<div class='s'>" + fmt(p.salida) + " → " + fmt(p.regreso) + "</div></div>";
+      "<div class='s'>" + fmt(p.salida) + " → " + fmt(p.regreso) + "</div>" +
+      ((p.entrego || p.recibio)
+        ? "<div class='s'>" + (p.entrego ? "Entregó: " + esc(p.entrego) : "") +
+          (p.entrego && p.recibio ? " · " : "") +
+          (p.recibio ? "Recibió: " + esc(p.recibio) : "") + "</div>" : "") +
+      "</div>";
   }).join("") + "</div>";
 }
 function tabConf(){
   return "<div class='card'><h2>Ajustes</h2>" +
     "<label>PIN de administrador</label><input id='cfPin' class='mono' value='" + esc(DB.config.pin) + "' inputmode='numeric' maxlength='8'>" +
     "<label>Marcar en rojo después de (horas)</label><input id='cfHoras' type='number' inputmode='numeric' min='1' value='" + DB.config.horasAlerta + "'>" +
+    "<label>Quién atiende el almacén (se graba en cada movimiento)</label><input id='cfEnc' value='" + esc(DB.config.encargado||"") + "' placeholder='Ej. Martín Flores'>" +
     "<div style='height:12px'></div><button class='sec' id='cfGuardar'>Guardar ajustes</button></div>" +
     "<div class='card'><h2>Respaldo</h2>" +
     "<p>Todo vive en este celular. Exporta seguido para no perderlo.</p>" +
@@ -844,6 +900,7 @@ function tabConf(){
 function engancharConf(){
   $("#cfGuardar").onclick = () => {
     const pin = $("#cfPin").value.trim(), hrs = parseInt($("#cfHoras").value,10);
+    DB.config.encargado = $("#cfEnc").value.trim();
     if(!/^\d{4,8}$/.test(pin)) return toast("El PIN debe ser de 4 a 8 dígitos", "err");
     if(!(hrs > 0)) return toast("Horas inválidas", "err");
     DB.config.pin = pin; DB.config.horasAlerta = hrs; guardar();
@@ -879,11 +936,12 @@ async function bajar(nombre, contenido, tipo){
 }
 const cell = v => '"' + String(v==null?"":v).replace(/"/g,'""') + '"';
 function exportarCSV(){
-  const filas = [["folio_herramienta","herramienta","tipo","cantidad","folio_persona","persona","teams","salida","regreso","estado","horas_fuera"]];
+  const filas = [["folio_herramienta","herramienta","tipo","cantidad","folio_persona","persona","teams","salida","regreso","entrego","recibio","estado","horas_fuera"]];
   DB.prestamos.slice().sort((a,b) => b.salida - a.salida).forEach(p => {
     const h = herrPorId(p.herrId), per = perPorId(p.perId), fin = p.regreso || Date.now();
     filas.push([p.herrId, h?h.nombre:"", h?h.tipo:"", p.cant||1, p.perId, per?per.nombre:"",
       per?per.teams:"", fmt(p.salida), p.regreso?fmt(p.regreso):"",
+      p.entrego||"", p.recibio||"",
       p.regreso ? "devuelto" : (esTarde(p) ? "FUERA CON RETRASO" : "fuera"),
       ((fin - p.salida)/3600e3).toFixed(1)]);
   });
@@ -974,6 +1032,21 @@ $("#btnDevolver").onclick = () => {
 $("#btnCancelar1").onclick = inicio;
 $("#btnCancelar2").onclick = inicio;
 $("#btnAbrirCam").onclick = abrirCamaraHerr;
+$("#btnCambiaAtiende").onclick = abrirAtiende;
+$("#atLista").addEventListener("click", e => {
+  const it = e.target.closest("[data-at]");
+  if(it) $("#atNombre").value = it.dataset.at;
+});
+$("#btnAtCancel").onclick = () => { if(persona) irPaso2(); else inicio(); };
+$("#btnAtGuardar").onclick = () => {
+  DB.config.encargado = $("#atNombre").value.trim();
+  guardar();
+  toast(DB.config.encargado ? "Atiende: " + DB.config.encargado : "Sin encargado", "ok");
+  if(persona) irPaso2();
+  else if(modo && encargado()) irPaso1(modo);   // seguimos con lo que íbamos a hacer
+  else inicio();
+};
+$("#atNombre").addEventListener("keydown", e => { if(e.key === "Enter") $("#btnAtGuardar").click(); });
 $("#btnListo").onclick = terminar;
 $("#btnFinOk").onclick = inicio;
 
@@ -1025,17 +1098,18 @@ $("#btnCantOk").onclick = () => {
     const d = disp(h);
     if(n > d) return toast("Solo hay " + d + " disponibles", "err");
     DB.prestamos.push({ id: nuevoIdPrestamo(), perId: persona.id, herrId: h.id,
-      cant: n, salida: Date.now(), regreso: null });
+      cant: n, salida: Date.now(), regreso: null, entrego: encargado() });
     guardar(); hechas.push(h.nombre + " ×" + n);
     toast("Salieron " + n + " · " + h.nombre, "ok");
   } else {
     const pr = cantCtx.prestamo;
     if(n > pr.cant) return toast("Se llevó " + pr.cant, "err");
-    if(n === pr.cant){ pr.regreso = Date.now(); }
+    if(n === pr.cant){ pr.regreso = Date.now(); pr.recibio = encargado(); }
     else {
       pr.cant -= n;
       DB.prestamos.push({ id: nuevoIdPrestamo(), perId: pr.perId, herrId: pr.herrId,
-        cant: n, salida: pr.salida, regreso: Date.now() });
+        cant: n, salida: pr.salida, regreso: Date.now(),
+        entrego: pr.entrego || "", recibio: encargado() });
     }
     guardar(); hechas.push(h.nombre + " ×" + n);
     toast("Devueltas " + n, "ok");
