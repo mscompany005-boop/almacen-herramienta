@@ -332,6 +332,8 @@ input:focus,select:focus{outline:2px solid var(--marca);border-color:transparent
     <button class="big" id="btnQRListo">Continuar</button>
     <button class="sec" id="btnDescargarQR">Descargar imagen</button>
     <button class="sec" id="btnImprimirQR">Imprimir credencial</button>
+    <button class="sec hide" id="btnBorrarPersona"
+      style="border-color:#E6B4B0;color:var(--alerta)">Eliminar esta persona</button>
   </section>
 
   <!-- ===================== PIN ===================== -->
@@ -368,7 +370,7 @@ input:focus,select:focus{outline:2px solid var(--marca);border-color:transparent
 "use strict";
 
 /* ======================= DATOS ======================= */
-const VERSION = 11;
+const VERSION = 12;
 const KEY = "almacen_herramienta_v1";
 const DEF = {
   personas: [],      // {id, nombre, teams, creado}
@@ -407,6 +409,8 @@ function guardar(){
 }
 
 const perPorId  = id => DB.personas.find(p => p.id === id);
+// nombre a mostrar: la persona si existe, o el que quedó guardado en el movimiento
+const nombreDe = mov => { const p = perPorId(mov.perId); return p ? p.nombre : (mov.perNombre || mov.perId); };
 const herrPorId = id => DB.herramientas.find(h => h.id === id);
 const abiertos  = () => DB.prestamos.filter(p => !p.regreso);
 const abiertosDe = id => abiertos().filter(p => p.perId === id);
@@ -971,8 +975,11 @@ function qrDataURL(texto, escala){
   return cv.toDataURL("image/png");
 }
 let personaQR = null;
-function mostrarQRPersona(p){
+let qrDesdePanel = false;
+function mostrarQRPersona(p, desdePanel){
   personaQR = p;
+  qrDesdePanel = !!desdePanel;
+  $("#btnBorrarPersona").classList.toggle("hide", !desdePanel);
   $("#qrNombre").textContent = p.nombre;
   $("#qrDatos").innerHTML = "<span class='mono'>" + esc(p.id) + "</span>" + (p.teams ? "<br>" + esc(p.teams) : "");
   $("#qrbox").innerHTML = qrTag(codigoPersona(p), 8);
@@ -1001,7 +1008,7 @@ function tabFuera(){
     return "<div class='item" + (t ? " late" : "") + "'>" +
       "<div class='t'>" + esc(h ? h.nombre : p.herrId) + (p.cant > 1 ? " ×" + p.cant : "") +
       (t ? " <span class='pill late'>RETRASO</span>" : "") + "</div>" +
-      "<div class='s'>" + esc(per ? per.nombre : p.perId) + "</div>" +
+      "<div class='s'>" + esc(nombreDe(p)) + (per ? "" : " (eliminada)") + "</div>" +
       "<div class='s'>Salió " + fmt(p.salida) + " · hace " + transcurrido(p.salida) +
       " · <span class='mono'>" + esc(p.herrId) + "</span></div>" +
       (p.entrego ? "<div class='s'>Entregó: " + esc(p.entrego) + "</div>" : "") +
@@ -1041,7 +1048,7 @@ function tabHist(){
     const t = herrPorId(p.herrId), per = perPorId(p.perId);
     return "<div class='item'><div class='t'>" + esc(t ? t.nombre : p.herrId) +
       (p.cant > 1 ? " ×" + p.cant : "") + "</div>" +
-      "<div class='s'>" + esc(per ? per.nombre : p.perId) + "</div>" +
+      "<div class='s'>" + esc(nombreDe(p)) + (per ? "" : " (eliminada)") + "</div>" +
       "<div class='s'>" + fmt(p.salida) + " → " + fmt(p.regreso) + "</div>" +
       ((p.entrego || p.recibio)
         ? "<div class='s'>" + (p.entrego ? "Entregó: " + esc(p.entrego) : "") +
@@ -1112,7 +1119,7 @@ function exportarCSV(){
   const filas = [["folio_herramienta","herramienta","tipo","cantidad","folio_persona","persona","teams","salida","regreso","entrego","recibio","estado","horas_fuera"]];
   DB.prestamos.slice().sort((a,b) => b.salida - a.salida).forEach(p => {
     const h = herrPorId(p.herrId), per = perPorId(p.perId), fin = p.regreso || Date.now();
-    filas.push([p.herrId, h?h.nombre:"", h?h.tipo:"", p.cant||1, p.perId, per?per.nombre:"",
+    filas.push([p.herrId, h?h.nombre:"", h?h.tipo:"", p.cant||1, p.perId, nombreDe(p),
       per?per.teams:"", fmt(p.salida), p.regreso?fmt(p.regreso):"",
       p.entrego||"", p.recibio||"",
       p.regreso ? "devuelto" : (esTarde(p) ? "FUERA CON RETRASO" : "fuera"),
@@ -1316,6 +1323,7 @@ $("#btnGuardarPersona").onclick = () => {
   mostrarQRPersona(p);
 };
 $("#btnQRListo").onclick = () => {
+  if(qrDesdePanel){ qrDesdePanel = false; ver("vPanel"); pintarPanel(); return; }
   if(MODO_REGISTRO){
     $("#pNombre").value = ""; $("#pTeams").value = "";
     $("#btnQRListo").textContent = "Continuar";
@@ -1343,6 +1351,28 @@ $("#btnImprimirQR").onclick = () => {
     "<p>" + esc(p.teams||"") + "</p><div class='f'>" + esc(p.id) + "</div>");
 };
 
+$("#btnBorrarPersona").onclick = () => {
+  const p = personaQR;
+  if(!p) return;
+  const pend = abiertosDe(p.id);
+  if(pend.length){
+    return toast("No se puede eliminar: " + p.nombre.split(" ")[0] + " trae " +
+      pend.length + (pend.length === 1 ? " herramienta" : " herramientas") +
+      " sin devolver.", "err", 5000);
+  }
+  const movs = DB.prestamos.filter(x => x.perId === p.id).length;
+  if(!confirm("¿Eliminar a " + p.nombre + "?\n\nSu credencial dejará de servir." +
+    (movs ? "\nSus " + movs + " movimientos quedan en el historial con su nombre." : ""))) return;
+  if(!confirm("Última confirmación. ¿Eliminar a " + p.nombre + "?")) return;
+  // el historial conserva el nombre aunque la persona ya no exista
+  DB.prestamos.forEach(x => { if(x.perId === p.id && !x.perNombre) x.perNombre = p.nombre; });
+  DB.personas = DB.personas.filter(x => x.id !== p.id);
+  guardar();
+  personaQR = null; qrDesdePanel = false;
+  toast("Eliminada: " + p.nombre, "ok", 3000);
+  ver("vPanel"); pintarPanel();
+};
+
 $("#btnPanel").onclick = () => {
   pararCamara(); $("#pinVal").value = "";
   $("#hdrTit").textContent = "Panel"; $("#hdrSub").textContent = "";
@@ -1359,7 +1389,7 @@ $("#btnSalirPanel").onclick = inicio;
 document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => { tab = b.dataset.tab; pintarPanel(); });
 $("#panelBody").addEventListener("click", e => {
   const a = e.target.closest("[data-qr]");
-  if(a){ e.preventDefault(); const p = perPorId(a.dataset.qr); if(p) mostrarQRPersona(p); return; }
+  if(a){ e.preventDefault(); const p = perPorId(a.dataset.qr); if(p) mostrarQRPersona(p, true); return; }
   const f = e.target.closest("[data-setfoto]");
   if(f){
     e.preventDefault();
