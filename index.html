@@ -3,126 +3,162 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0f1216">
+<meta name="theme-color" content="#008AA6">
 <link rel="manifest" href="manifest.json">
 <title>Almacén de Herramienta</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;height:100%}
 body{
-  background:#0f1216;color:#e8edf2;
-  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:var(--fondo);color:var(--tinta);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
   display:flex;flex-direction:column;overscroll-behavior:none;
 }
 :root{
-  --verde:#2f9e6e; --verde2:#24805a;
-  --ambar:#c8821f; --ambar2:#a66b16;
-  --rojo:#d9433f; --card:#181d24; --line:#272e38; --mut:#8b97a6;
+  --marca:#008AA6;          /* teal mabe */
+  --marca2:#006C83;
+  --marca3:#00566A;
+  --marca-suave:#E3F3F7;
+  --accion2:#D97A1E;        /* devolver */
+  --accion2b:#B2600F;
+  --ok:#1E7F52;
+  --ok-suave:#E4F3EB;
+  --alerta:#B3261E;
+  --alerta-suave:#FBE9E7;
+  --aviso:#8A5A00;
+  --aviso-suave:#FCF1DC;
+  --fondo:#F2F5F7;
+  --card:#FFFFFF;
+  --linea:#DCE4EA;
+  --tinta:#17232E;
+  --mut:#5D6E7C;
 }
 header{
-  padding:12px 14px;background:#141920;border-bottom:1px solid var(--line);
+  padding:14px 16px;background:var(--marca);color:#fff;
   display:flex;align-items:center;gap:10px;flex:0 0 auto;
+  box-shadow:0 2px 8px rgba(0,0,0,.14);z-index:5;
 }
-header h1{font-size:15px;margin:0;font-weight:600;flex:1;line-height:1.25}
-header .sub{font-size:11.5px;color:var(--mut);font-weight:400;margin-top:1px}
+header h1{font-size:16px;margin:0;font-weight:700;flex:1;line-height:1.25;letter-spacing:.2px}
+header .sub{font-size:11.5px;color:rgba(255,255,255,.85);font-weight:500;margin-top:2px}
 .iconbtn{
-  background:#222935;border:1px solid var(--line);color:#cfd8e3;
-  border-radius:9px;padding:9px 12px;font-size:13px;font-weight:600;flex:0 0 auto;
+  background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);color:#fff;
+  border-radius:8px;padding:9px 13px;font-size:13px;font-weight:600;flex:0 0 auto;
 }
-main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;padding-bottom:30px}
+.iconbtn:active{background:rgba(255,255,255,.3)}
+main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;padding-bottom:32px}
 .hide{display:none!important}
 button{font-family:inherit;cursor:pointer}
 
-/* botones de accion */
+/* acciones principales */
 .accion{
-  width:100%;border:0;border-radius:16px;padding:26px 18px;margin-bottom:12px;
-  text-align:left;color:#fff;display:block;
+  width:100%;border:0;border-radius:12px;padding:22px 18px;margin-bottom:12px;
+  text-align:left;color:#fff;display:flex;align-items:center;gap:14px;
+  box-shadow:0 2px 6px rgba(23,35,46,.16);
 }
-.accion .t{font-size:23px;font-weight:800;letter-spacing:.3px;display:block}
-.accion .d{font-size:13.5px;opacity:.9;margin-top:4px;display:block;font-weight:500}
-.accion.prestar{background:var(--verde)}
-.accion.prestar:active{background:var(--verde2)}
-.accion.devolver{background:var(--ambar)}
-.accion.devolver:active{background:var(--ambar2)}
+.accion .ico{
+  width:46px;height:46px;border-radius:10px;flex:0 0 auto;
+  background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;
+  font-size:24px;line-height:1;
+}
+.accion .txt{flex:1}
+.accion .t{font-size:21px;font-weight:800;letter-spacing:.4px;display:block}
+.accion .d{font-size:13px;opacity:.95;margin-top:3px;display:block;font-weight:500}
+.accion .fl{font-size:22px;opacity:.75}
+.accion.prestar{background:var(--marca)}
+.accion.prestar:active{background:var(--marca2)}
+.accion.devolver{background:var(--accion2)}
+.accion.devolver:active{background:var(--accion2b)}
 
 .big{
-  width:100%;padding:19px;font-size:18px;font-weight:700;border:0;border-radius:14px;
-  background:var(--verde);color:#fff;
+  width:100%;padding:17px;font-size:17px;font-weight:700;border:0;border-radius:10px;
+  background:var(--marca);color:#fff;letter-spacing:.3px;
+  box-shadow:0 2px 5px rgba(23,35,46,.14);
 }
-.big.gris{background:#2b3340;color:#dbe3ec}
-.big.ambar{background:var(--ambar)}
+.big:active{background:var(--marca2)}
+.big.gris{background:#5D6E7C}
+.big.gris:active{background:#4A5964}
+.big.ambar{background:var(--accion2)}
+.big.ambar:active{background:var(--accion2b)}
 .sec{
-  width:100%;padding:13px;font-size:15px;font-weight:600;border:1px solid var(--line);
-  border-radius:11px;background:#1d242d;color:#dbe3ec;margin-top:9px;
+  width:100%;padding:13px;font-size:15px;font-weight:600;border:1px solid var(--linea);
+  border-radius:10px;background:#fff;color:var(--marca2);margin-top:9px;
 }
+.sec:active{background:var(--marca-suave)}
 
-.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px;margin-bottom:12px}
-.card h2{margin:0 0 5px;font-size:16px}
-.card p{margin:3px 0;font-size:13px;color:var(--mut);line-height:1.45}
-
-/* cabecera de paso */
-.pasobar{
-  display:flex;align-items:center;gap:10px;margin-bottom:12px;
+.card{
+  background:var(--card);border:1px solid var(--linea);border-radius:10px;
+  padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(23,35,46,.06);
 }
+.card h2{margin:0 0 6px;font-size:14px;font-weight:700;color:var(--tinta);
+  text-transform:uppercase;letter-spacing:.6px}
+.card p{margin:3px 0;font-size:13.5px;color:var(--mut);line-height:1.5}
+
+/* barra de pasos */
+.pasobar{display:flex;align-items:center;gap:11px;margin-bottom:14px}
 .pasonum{
   width:34px;height:34px;border-radius:50%;flex:0 0 auto;
   display:flex;align-items:center;justify-content:center;
-  font-weight:800;font-size:16px;color:#fff;background:var(--verde);
+  font-weight:800;font-size:15px;color:#fff;background:var(--marca);
 }
-.pasobar.dev .pasonum{background:var(--ambar)}
+.pasobar.dev .pasonum{background:var(--accion2)}
 .pasotxt{flex:1}
-.pasotxt .k{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;font-weight:700}
-.pasotxt .v{font-size:16px;font-weight:700;margin-top:1px}
+.pasotxt .k{font-size:10.5px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;font-weight:800}
+.pasotxt .v{font-size:16.5px;font-weight:700;margin-top:1px;color:var(--tinta)}
 
-.pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
-.pill.ok{background:#17382a;color:#5fd39b}
-.pill.out{background:#3a2420;color:#f08a86}
-.pill.late{background:var(--rojo);color:#fff}
+.pill{display:inline-block;padding:3px 9px;border-radius:4px;font-size:10.5px;
+  font-weight:800;letter-spacing:.4px;text-transform:uppercase;vertical-align:middle}
+.pill.ok{background:var(--ok-suave);color:var(--ok)}
+.pill.out{background:var(--aviso-suave);color:var(--aviso)}
+.pill.late{background:var(--alerta);color:#fff}
 
-label{display:block;font-size:12px;color:var(--mut);margin:12px 0 5px;font-weight:600}
+label{display:block;font-size:12px;color:var(--mut);margin:14px 0 6px;
+  font-weight:700;text-transform:uppercase;letter-spacing:.5px}
 input,select{
-  width:100%;padding:13px;font-size:16px;border-radius:10px;
-  border:1px solid var(--line);background:#11161c;color:#e8edf2;
+  width:100%;padding:13px;font-size:16px;border-radius:8px;
+  border:1px solid var(--linea);background:#fff;color:var(--tinta);
 }
-input:focus,select:focus{outline:2px solid var(--verde);border-color:transparent}
+input:focus,select:focus{outline:2px solid var(--marca);border-color:transparent}
 
-#scanwrap{position:relative;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:1/1;margin-bottom:12px}
+#scanwrap{position:relative;border-radius:10px;overflow:hidden;background:#0d1419;
+  aspect-ratio:1/1;margin-bottom:12px;border:1px solid var(--linea)}
 #video{width:100%;height:100%;object-fit:cover;display:block}
-#reticle{position:absolute;inset:16%;border:3px solid rgba(255,255,255,.85);border-radius:16px;
-  box-shadow:0 0 0 2000px rgba(0,0,0,.35)}
-#scanmsg{position:absolute;left:0;right:0;bottom:0;padding:10px;background:rgba(0,0,0,.75);
-  font-size:13.5px;text-align:center;font-weight:600}
+#reticle{position:absolute;inset:16%;border:3px solid rgba(255,255,255,.9);border-radius:12px;
+  box-shadow:0 0 0 2000px rgba(0,0,0,.4)}
+#scanmsg{position:absolute;left:0;right:0;bottom:0;padding:10px;background:rgba(0,0,0,.78);
+  font-size:13.5px;text-align:center;font-weight:600;color:#fff}
 
 #toast{
-  position:fixed;left:12px;right:12px;bottom:14px;padding:16px;border-radius:13px;
+  position:fixed;left:14px;right:14px;bottom:16px;padding:15px;border-radius:10px;
   font-size:15px;font-weight:700;text-align:center;z-index:50;line-height:1.35;
-  box-shadow:0 8px 28px rgba(0,0,0,.5);
+  box-shadow:0 6px 20px rgba(23,35,46,.3);
 }
-#toast.ok{background:var(--verde);color:#fff}
-#toast.err{background:var(--rojo);color:#fff}
-#toast.info{background:#2b3340;color:#e8edf2}
+#toast.ok{background:var(--ok);color:#fff}
+#toast.err{background:var(--alerta);color:#fff}
+#toast.info{background:#37474F;color:#fff}
 
-.item{border-bottom:1px solid var(--line);padding:11px 0}
+.item{border-bottom:1px solid var(--linea);padding:11px 0}
 .item:last-child{border-bottom:0}
-.item .t{font-size:15px;font-weight:600}
-.item .s{font-size:12px;color:var(--mut);margin-top:2px}
-.item.late .t{color:#ff8e8a}
+.item .t{font-size:15px;font-weight:600;color:var(--tinta)}
+.item .s{font-size:12.5px;color:var(--mut);margin-top:2px}
+.item.late .t{color:var(--alerta)}
 .item.tap{cursor:pointer}
+.item.tap:active{background:var(--marca-suave)}
 
-.tabs{display:flex;gap:7px;margin-bottom:13px;overflow-x:auto;padding-bottom:3px}
-.tabs button{flex:0 0 auto;padding:9px 14px;border-radius:20px;border:1px solid var(--line);
-  background:#1b2129;color:#b9c4d1;font-size:13px;font-weight:600}
-.tabs button.on{background:var(--verde);border-color:var(--verde);color:#fff}
-.empty{text-align:center;color:var(--mut);font-size:13px;padding:26px 10px;line-height:1.55}
-#qrbox{background:#fff;padding:16px;border-radius:13px;text-align:center}
+.tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:3px}
+.tabs button{flex:0 0 auto;padding:9px 14px;border-radius:7px;border:1px solid var(--linea);
+  background:#fff;color:var(--mut);font-size:13px;font-weight:600}
+.tabs button.on{background:var(--marca);border-color:var(--marca);color:#fff}
+.empty{text-align:center;color:var(--mut);font-size:13.5px;padding:28px 10px;line-height:1.6}
+#qrbox{background:#fff;padding:16px;border-radius:10px;text-align:center;border:1px solid var(--linea)}
 #qrbox img{width:100%;max-width:250px;height:auto;image-rendering:pixelated}
-.mono{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.5px}
-.warnbar{background:#3a2d16;border:1px solid #6b5423;color:#e8c783;padding:11px;
-  border-radius:11px;font-size:12.5px;line-height:1.5;margin-bottom:12px}
-.okbig{text-align:center;padding:14px 6px}
-.okbig .tick{font-size:52px;line-height:1}
-.okbig h2{margin:10px 0 4px;font-size:20px}
-.okbig p{color:var(--mut);font-size:14px;margin:2px 0}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.3px}
+.warnbar{background:var(--aviso-suave);border:1px solid #E6C98A;color:var(--aviso);padding:12px;
+  border-radius:8px;font-size:12.5px;line-height:1.5;margin-bottom:12px;font-weight:500}
+.okbig{text-align:center;padding:16px 6px}
+.okbig .tick{font-size:50px;line-height:1}
+.okbig h2{margin:10px 0 6px;font-size:19px;text-transform:none;letter-spacing:0}
+.okbig p{color:var(--mut);font-size:14px;margin:3px 0}
+.marca-pie{text-align:center;color:var(--mut);font-size:11px;margin-top:18px;opacity:.75}
 </style>
 </head>
 <body>
@@ -148,16 +184,21 @@ input:focus,select:focus{outline:2px solid var(--verde);border-color:transparent
     </div>
 
     <button class="accion prestar soloKiosco" id="btnPrestar">
-      <span class="t">PRESTAR</span>
-      <span class="d">Alguien se lleva herramienta</span>
+      <span class="ico">&#8599;</span>
+      <span class="txt"><span class="t">PRESTAR</span>
+      <span class="d">Alguien se lleva herramienta</span></span>
+      <span class="fl">&#8250;</span>
     </button>
     <button class="accion devolver soloKiosco" id="btnDevolver">
-      <span class="t">DEVOLVER</span>
-      <span class="d">Alguien regresa herramienta</span>
+      <span class="ico">&#8601;</span>
+      <span class="txt"><span class="t">DEVOLVER</span>
+      <span class="d">Alguien regresa herramienta</span></span>
+      <span class="fl">&#8250;</span>
     </button>
 
     <button class="sec" id="btnAlta">Registrar persona nueva</button>
     <div id="resumen" class="soloKiosco" style="margin-top:16px"></div>
+    <div class="marca-pie soloKiosco">Control interno de herramienta</div>
   </section>
 
   <!-- ===================== PASO 1: PERSONA ===================== -->
@@ -314,7 +355,7 @@ input:focus,select:focus{outline:2px solid var(--verde);border-color:transparent
 "use strict";
 
 /* ======================= DATOS ======================= */
-const VERSION = 9;
+const VERSION = 10;
 const KEY = "almacen_herramienta_v1";
 const DEF = {
   personas: [],      // {id, nombre, teams, creado}
@@ -423,7 +464,7 @@ function pintarResumen(){
   const a = abiertos(), tarde = a.filter(esTarde).length;
   $("#resumen").innerHTML =
     "<div class='card'><h2>Estado del almacén</h2>" +
-    "<p><b style='color:" + (a.length ? "#f0b86e" : "#5fd39b") + "'>" + a.length + "</b> " +
+    "<p><b style='color:" + (a.length ? "var(--aviso)" : "var(--ok)") + "'>" + a.length + "</b> " +
       (a.length === 1 ? "herramienta fuera" : "herramientas fuera") +
       (tarde ? " · <span class='pill late'>" + tarde + " con retraso</span>" : "") + "</p>" +
     "<p>" + DB.herramientas.length + " en el catálogo · " + DB.personas.length + " personas</p>" +
@@ -487,7 +528,7 @@ function pintarAtiende(){
   $("#etqAtiende").textContent = dev ? "Recibe" : "Entrega";
   const e = encargado();
   $("#txtAtiende").textContent = e || "sin definir";
-  $("#txtAtiende").style.color = e ? "#e8edf2" : "#f0b86e";
+  $("#txtAtiende").style.color = e ? "var(--tinta)" : "var(--aviso)";
 }
 
 function abrirAtiende(){
@@ -679,7 +720,7 @@ function terminar(){
     "<h2>" + (n ? (dev ? "Devolución registrada" : "Préstamo registrado") : "Sin cambios") + "</h2>" +
     (n ? "<p><b>" + esc(persona.nombre) + "</b></p>" +
          "<p>" + n + (n === 1 ? " herramienta " : " herramientas ") + (dev ? "devueltas" : "entregadas") + "</p>" +
-         "<p style='margin-top:8px;color:#5fd39b'>" + hechas.map(esc).join(" · ") + "</p>" +
+         "<p style='margin-top:8px;color:var(--ok);font-weight:600'>" + hechas.map(esc).join(" · ") + "</p>" +
          (encargado() ? "<p style='margin-top:8px'>" + (dev ? "Recibió: " : "Entregó: ") +
             "<b>" + esc(encargado()) + "</b></p>" : "")
        : "<p>No se registró ninguna herramienta.</p>");
@@ -858,7 +899,7 @@ function tabPer(){
     return "<div class='item'><div class='t'>" + esc(p.nombre) +
       (n ? " <span class='pill out'>" + n + " fuera</span>" : "") + "</div>" +
       "<div class='s'>" + esc(p.teams||"") + " · <span class='mono'>" + esc(p.id) + "</span></div>" +
-      "<div class='s'><a href='#' data-qr='" + esc(p.id) + "' style='color:#5fd39b'>Ver su credencial</a></div></div>";
+      "<div class='s'><a href='#' data-qr='" + esc(p.id) + "' style='color:var(--marca2);font-weight:600'>Ver su credencial</a></div></div>";
   }).join("") + "</div>";
 }
 function tabHist(){
@@ -895,7 +936,7 @@ function tabConf(){
     "<button class='sec' id='cfLiga'>Liga para que el personal se registre</button></div>" +
     "<div class='card'><h2>Zona de riesgo</h2>" +
     "<p>Borra personas, herramientas e historial. No se puede deshacer.</p>" +
-    "<button class='sec' id='cfBorrar' style='border-color:#6a2b28;color:#f08a86'>Borrar todos los datos</button></div>";
+    "<button class='sec' id='cfBorrar' style='border-color:#E6B4B0;color:var(--alerta)'>Borrar todos los datos</button></div>";
 }
 function engancharConf(){
   $("#cfGuardar").onclick = () => {
@@ -1014,8 +1055,8 @@ function ligaRegistro(){
   const caja = document.createElement("div");
   caja.className = "card";
   caja.innerHTML = "<h2>Liga de registro</h2>" +
-    "<p style='word-break:break-all;color:#e8edf2'>" + esc(liga) + "</p>" +
-    "<div style='background:#fff;padding:12px;border-radius:10px;text-align:center'>" +
+    "<p style='word-break:break-all;color:var(--tinta)'>" + esc(liga) + "</p>" +
+    "<div style='background:#fff;padding:12px;border-radius:10px;text-align:center;border:1px solid var(--linea)'>" +
     "<img src='" + qrDataURL(liga,8) + "' style='width:100%;max-width:220px'></div>" +
     "<p>Que la escaneen con su celular. Solo verán el formulario de registro.</p>";
   const cont = $("#panelBody");
