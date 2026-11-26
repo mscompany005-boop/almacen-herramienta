@@ -1,0 +1,9 @@
+{
+  "name": "Almacén de Herramienta",
+  "short_name": "Herramienta",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f1216",
+  "theme_color": "#0f1216"
+}
